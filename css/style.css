@@ -229,14 +229,21 @@ nav ul li a {
 }
 
 .about-content {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
 .about-text {
-    column-count: 2;
-    column-gap: 20px;
+    flex: 1;
+    min-width: 300px;
+}
+
+.about-text.full-width {
+    flex: 1 1 100%;
+    max-width: 100%;
+    text-align: center;
 }
 
 .about-text p {
