@@ -874,7 +874,7 @@ footer {
     margin: 70px 0;
 }
 
-.static-banner {
+.video-container {
     width: 100%;
     height: 100%;
     position: relative;
@@ -882,25 +882,19 @@ footer {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                url('../images/weddingonaments.jpg');
-    background-size: cover;
-    background-position: center;
 }
 
-/* Banner fallback image */
-.banner-fallback-img {
+.video-container video {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.4; /* Darkened to match the overlay effect */
     z-index: 0;
 }
 
-/* Brand overlay - increasing z-index */
+/* Brand overlay */
 .brand-overlay {
     position: absolute;
     top: 0;

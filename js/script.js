@@ -265,6 +265,25 @@ document.addEventListener('DOMContentLoaded', function() {
             galleryScroll.style.animationPlayState = 'running';
         });
     }
+
+    // Make sure video plays on mobile devices
+    const bannerVideo = document.getElementById('banner-video');
+    if (bannerVideo) {
+        // Try to play video after a short delay
+        setTimeout(() => {
+            // Force play with user interaction simulation
+            bannerVideo.play().catch(error => {
+                console.log('Video play failed, but we have a poster fallback:', error);
+            });
+
+            // Try again after user scrolls
+            window.addEventListener('scroll', function videoPlayHandler() {
+                bannerVideo.play().catch(() => {});
+                // Only try once after scroll
+                window.removeEventListener('scroll', videoPlayHandler);
+            });
+        }, 1000);
+    }
 });
 
 // Global prevention of right-click and text selection
