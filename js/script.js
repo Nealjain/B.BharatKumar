@@ -286,4 +286,8 @@ document.addEventListener('DOMContentLoaded', function() {
             galleryScroll.style.animationPlayState = 'running';
         });
     }
-}); 
+});
+
+// Prevent right-clicking and text selection
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('selectstart', event => event.preventDefault()); 

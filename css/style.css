@@ -28,6 +28,10 @@ html::-webkit-scrollbar {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 body {
@@ -42,6 +46,12 @@ body {
 img {
     max-width: 100%;
     display: block;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+    pointer-events: none;
 }
 
 a {
@@ -775,6 +785,18 @@ footer {
     .contact-info {
         gap: 15px;
     }
+    
+    .brand a {
+        font-size: 1.2rem;
+    }
+    
+    .header .container {
+        padding: 0.5rem;
+    }
+    
+    .hero-content h1 {
+        font-size: 2rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -805,6 +827,14 @@ footer {
     
     .brand-text {
         font-size: 3.5rem;
+    }
+    
+    .brand a {
+        font-size: 1rem;
+    }
+    
+    .header .container {
+        padding: 0.3rem;
     }
 }
 
