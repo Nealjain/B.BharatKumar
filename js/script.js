@@ -247,47 +247,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const brandOverlay = document.querySelector('.brand-overlay');
     
     if (video && videoContainer) {
-        // Function to check if element is in viewport
-        function isInViewport(element) {
-            const rect = element.getBoundingClientRect();
-            return (
-                rect.top >= -100 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + 100
-            );
-        }
+        // Force video to play regardless of viewport visibility
+        video.muted = true; // Ensure video is muted (required for autoplay)
+        video.playsInline = true;
+        video.autoplay = true;
         
-        // Function to handle video play/pause cycle
-        function handleVideoVisibility() {
-            if (isInViewport(videoContainer)) {
-                // Only start the cycle if it hasn't been started yet
-                if (!videoContainer.classList.contains('cycle-started')) {
-                    videoContainer.classList.add('cycle-started');
-                    videoContainer.classList.add('in-view');
-                    startVideoCycle();
-                } else if (!videoContainer.classList.contains('in-view')) {
-                    // If returning to view and cycle is already started, just make visible
-                    videoContainer.classList.add('in-view');
-                }
-            } else if (videoContainer.classList.contains('in-view')) {
-                // When scrolling away, DON'T hide the video, just mark as not in view
-                videoContainer.classList.remove('in-view');
-                // But keep video visible
-            }
-        }
+        // Try to play immediately
+        var playPromise = video.play();
         
-        // Function to start the video cycle
-        function startVideoCycle() {
-            // Reset state
-            videoContainer.classList.remove('paused');
-            brandOverlay.classList.remove('visible');
-            
-            // Start video (now plays regardless of view status)
-            video.currentTime = 0;
-            video.play();
-            
-            // After 4.5 seconds, smoothly fade out and pause video
-            window.playTimer = setTimeout(() => {
-                if (video.played.length > 0) { // Only if video actually played
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                // Playback started successfully
+                console.log("Video playback started");
+                
+                // After 4.5 seconds, smoothly fade out and pause video
+                setTimeout(() => {
                     // Smooth stop by reducing playback rate gradually
                     let rate = 1.0;
                     const fadeInterval = setInterval(() => {
@@ -297,26 +271,28 @@ document.addEventListener('DOMContentLoaded', function() {
                             video.pause();
                             videoContainer.classList.add('paused');
                             brandOverlay.classList.add('visible');
+                            
+                            // Restart the cycle after 30 seconds
+                            setTimeout(() => {
+                                videoContainer.classList.remove('paused');
+                                brandOverlay.classList.remove('visible');
+                                video.currentTime = 0;
+                                video.play();
+                            }, 30000);
                         } else {
                             video.playbackRate = rate;
                         }
                     }, 50);
-                    
-                    // After 30 seconds, restart the cycle regardless of viewport visibility
-                    window.cycleTimer = setTimeout(() => {
-                        if (videoContainer.classList.contains('cycle-started')) {
-                            startVideoCycle();
-                        }
-                    }, 30000);
-                }
-            }, 4500);
+                }, 4500);
+            })
+            .catch(error => {
+                // Auto-play was prevented
+                console.log("Video autoplay prevented:", error);
+                // Show the brand overlay immediately as fallback
+                videoContainer.classList.add('paused');
+                brandOverlay.classList.add('visible');
+            });
         }
-        
-        // Check visibility on scroll
-        window.addEventListener('scroll', handleVideoVisibility);
-        
-        // Check initial visibility
-        handleVideoVisibility();
     }
     
     // Animation on scroll
