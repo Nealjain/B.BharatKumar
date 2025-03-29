@@ -179,90 +179,135 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Video Section Enhancement
+    // Video Section Enhancement with 4-sec cycles and text slot machine
     const video = document.getElementById('apple-style-video');
     const brandOverlay = document.querySelector('.brand-overlay');
+    const brandText = document.querySelector('.brand-text');
     const videoContainer = document.querySelector('.video-container');
     
     if (video) {
         // Set video properties
         video.muted = true;
         video.playsInline = true;
-        video.loop = true;
-        
-        // Pre-load the video
+        video.loop = false; // Don't loop automatically
         video.preload = 'auto';
         
-        // Properly handle video loading
+        // Characters for slot machine effect
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        const finalText = "B.BharatKumar";
+        let frameCount = 0;
+        const framesPerChar = 3;
+        let textUpdateInterval;
+        
+        // Initialize text
+        brandText.textContent = generateRandomString(finalText.length);
+        
+        // Start video cycle when loaded
         video.addEventListener('loadeddata', function() {
             videoContainer.classList.add('loaded');
-            // Start playing when in viewport
-            checkVideoVisibility();
+            startVideoCycle();
         });
         
         // Handle video errors
         video.addEventListener('error', function() {
             console.error('Video loading error');
-            // Show brand overlay if video fails
             brandOverlay.classList.add('visible');
             videoContainer.classList.add('paused');
         });
         
-        // Intersection Observer to detect when video is in viewport
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    videoContainer.classList.add('in-view');
-                    // Try to play video when in view
-                    playVideoWithFallback();
-                } else {
-                    videoContainer.classList.remove('in-view');
-                    // Pause video when out of view to save resources
-                    video.pause();
-                    brandOverlay.classList.add('visible');
-                    videoContainer.classList.add('paused');
-                }
-            });
-        }, { threshold: 0.3 }); // When 30% of the video is visible
+        // Video ended event
+        video.addEventListener('ended', function() {
+            videoContainer.classList.add('paused');
+            brandOverlay.classList.add('visible');
+            startSlotMachineEffect();
+        });
         
-        observer.observe(videoContainer);
-        
-        // Function to handle video playback with fallback
-        function playVideoWithFallback() {
+        // Start video play cycle
+        function startVideoCycle() {
+            // Reset state
+            clearInterval(textUpdateInterval);
+            videoContainer.classList.remove('paused');
+            brandOverlay.classList.remove('visible');
+            
+            // Reset video and play
+            video.currentTime = 0;
+            
+            // Play for 4 seconds then pause and show overlay
             const playPromise = video.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    // Video started playing successfully
-                    brandOverlay.classList.remove('visible');
-                    videoContainer.classList.remove('paused');
+                    // If video is longer than 4 seconds, set a timeout to pause it
+                    if (video.duration > 4) {
+                        setTimeout(() => {
+                            video.pause();
+                            videoContainer.classList.add('paused');
+                            brandOverlay.classList.add('visible');
+                            startSlotMachineEffect();
+                        }, 4000);
+                    }
+                    // If video is shorter than 4 seconds, the 'ended' event will trigger
                 }).catch(error => {
-                    // Auto-play was prevented
                     console.log('Auto-play prevented:', error);
-                    brandOverlay.classList.add('visible');
                     videoContainer.classList.add('paused');
+                    brandOverlay.classList.add('visible');
+                    startSlotMachineEffect();
                 });
             }
         }
         
-        // Check visibility on scroll
-        function checkVideoVisibility() {
-            const rect = videoContainer.getBoundingClientRect();
-            const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        // Start slot machine text effect
+        function startSlotMachineEffect() {
+            frameCount = 0;
             
-            if (rect.top < windowHeight && rect.bottom > 0) {
-                videoContainer.classList.add('in-view');
-                playVideoWithFallback();
-            } else {
-                videoContainer.classList.remove('in-view');
-                video.pause();
-                brandOverlay.classList.add('visible');
-                videoContainer.classList.add('paused');
-            }
+            // Start with random text
+            brandText.textContent = generateRandomString(finalText.length);
+            
+            // Update text with slot machine effect
+            textUpdateInterval = setInterval(() => {
+                frameCount++;
+                
+                // Generate partially completed text
+                let text = "";
+                for (let i = 0; i < finalText.length; i++) {
+                    // If this character position should be finalized
+                    if (frameCount >= i * framesPerChar) {
+                        text += finalText[i];
+                    } else {
+                        text += chars[Math.floor(Math.random() * chars.length)];
+                    }
+                }
+                
+                // Update the display
+                brandText.textContent = text;
+                
+                // If effect is complete
+                if (frameCount >= finalText.length * framesPerChar + 10) {
+                    clearInterval(textUpdateInterval);
+                    
+                    // After 3 seconds, start the cycle again
+                    setTimeout(() => {
+                        startVideoCycle();
+                    }, 3000);
+                }
+            }, 50);
         }
         
-        // Listen for scroll to check visibility
-        window.addEventListener('scroll', checkVideoVisibility);
+        // Generate random string of specified length
+        function generateRandomString(length) {
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        // Initial cycle start
+        setTimeout(() => {
+            if (videoContainer.classList.contains('loaded')) {
+                startVideoCycle();
+            }
+        }, 1000);
     }
     
     // Animation on scroll

@@ -936,7 +936,7 @@ footer {
     height: 100%;
     object-fit: cover;
     opacity: 0.8; /* Slightly transparent for elegance */
-    transition: filter 1s ease, transform 1s ease, opacity 0.5s ease;
+    transition: filter 0.8s ease, transform 0.8s ease, opacity 0.5s ease;
     cursor: default;
 }
 
@@ -979,14 +979,9 @@ footer {
     to { transform: rotate(360deg); }
 }
 
-/* Visibility changes when in viewport */
-.video-container.in-view video {
-    opacity: 1;
-}
-
 /* Blur effect when paused */
 .video-container.paused video {
-    filter: blur(8px);
+    filter: blur(12px);
     transform: scale(1.05); /* Subtle zoom effect */
 }
 
@@ -1003,6 +998,7 @@ footer {
     opacity: 0;
     transition: opacity 0.5s ease;
     z-index: 10;
+    background-color: rgba(0, 0, 0, 0.3);
     pointer-events: none;
 }
 
@@ -1010,9 +1006,10 @@ footer {
     opacity: 1;
 }
 
+/* Text slot machine effect */
 .brand-text {
     font-family: 'Cinzel', serif;
-    font-size: 5.5rem;
+    font-size: 5rem;
     font-weight: 700;
     color: var(--gold);
     text-align: center;
@@ -1021,10 +1018,26 @@ footer {
     transform: scale(0.9);
     transition: transform 0.5s ease;
     letter-spacing: 2.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .brand-overlay.visible .brand-text {
     transform: scale(1);
+    animation: textGlow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+    from {
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5),
+                    0 0 10px rgba(255, 215, 0, 0.5),
+                    0 0 15px rgba(255, 215, 0, 0.5);
+    }
+    to {
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.8),
+                    0 0 20px rgba(255, 215, 0, 0.8),
+                    0 0 30px rgba(255, 215, 0, 0.8);
+    }
 }
 
 @media (max-width: 768px) {
@@ -1033,7 +1046,8 @@ footer {
     }
     
     .brand-text {
-        font-size: 3rem;
+        font-size: 2.5rem;
+        letter-spacing: 1.5px;
     }
 }
 
