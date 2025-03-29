@@ -874,7 +874,7 @@ footer {
     margin: 70px 0;
 }
 
-.video-container {
+.static-banner {
     width: 100%;
     height: 100%;
     position: relative;
@@ -882,14 +882,10 @@ footer {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-}
-
-.video-container video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 1;
-    z-index: 1;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
 }
 
 /* Brand overlay */
@@ -902,7 +898,6 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2;
     background-color: rgba(0, 0, 0, 0.4);
 }
 
