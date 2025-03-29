@@ -991,4 +991,39 @@ body.menu-open::before {
 .video-container video:focus::-webkit-media-controls,
 .video-container video.playing::-webkit-media-controls {
     opacity: 1;
+}
+
+/* Video/Brand Cycle Section */
+#video-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+}
+
+#video-layer.active {
+    opacity: 1;
+}
+
+#brand-only-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 2;
+}
+
+#brand-only-overlay.active {
+    opacity: 1;
 } 
