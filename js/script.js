@@ -266,23 +266,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Make sure video plays on mobile devices
+    // Play the video no matter what
     const bannerVideo = document.getElementById('banner-video');
     if (bannerVideo) {
-        // Try to play video after a short delay
-        setTimeout(() => {
-            // Force play with user interaction simulation
+        // Ensure video attributes are set programmatically
+        bannerVideo.muted = true;
+        bannerVideo.loop = true;
+        bannerVideo.playsInline = true;
+        bannerVideo.autoplay = true;
+        
+        // Try immediately
+        playVideo();
+        
+        // Try again after a short delay
+        setTimeout(playVideo, 1000);
+        
+        // And again after another delay
+        setTimeout(playVideo, 3000);
+        
+        // Try on scroll
+        window.addEventListener('scroll', playVideo, {once: true});
+        
+        // Try on click anywhere
+        document.addEventListener('click', playVideo, {once: true});
+        
+        function playVideo() {
             bannerVideo.play().catch(error => {
-                console.log('Video play failed, but we have a poster fallback:', error);
+                console.log('Video play attempt:', error);
             });
-
-            // Try again after user scrolls
-            window.addEventListener('scroll', function videoPlayHandler() {
-                bannerVideo.play().catch(() => {});
-                // Only try once after scroll
-                window.removeEventListener('scroll', videoPlayHandler);
-            });
-        }, 1000);
+        }
     }
 });
 
