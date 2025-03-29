@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>B.BharatKumar - Fine Jewelry</title>
-    <link rel="stylesheet" href="css/style.css?v=20250330">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +47,7 @@
             <h2 class="section-title">About Us</h2>
             <div class="about-content">
                 <div class="about-text full-width">
-                    <p>B.BharatKumar is a premier jewelry shop in Mumbai with a legacy dating back to the 1950s. We offer exquisite gold and 92.5 silver pieces that blend traditional craftsmanship with contemporary designs.</p>
+                    <p>B.BharatKumar is a premier jewelry shop in Mumbai with a legacy dating back to the 1950s. We offer exquisite gold, diamond, and gemstone pieces that blend traditional craftsmanship with contemporary designs.</p>
                     <p>Our master artisans create timeless jewelry using age-old techniques and the finest materials. Each piece reflects our commitment to quality, authenticity, and cultural heritage.</p>
                     <p>At B.BharatKumar, we believe jewelry is a personal expression, not just an accessory. Our designs honor traditional Indian motifs while embracing modern sensibilities.</p>
                 </div>
@@ -58,26 +55,18 @@
         </div>
     </section>
 
-    <!-- Custom Video/Brand Cycle Section -->
+    <!-- Video Section - Apple Style -->
     <section id="video-wallpaper" class="video-wallpaper">
         <div class="video-container">
-            <!-- Video layer -->
-            <div id="video-layer">
-                <iframe 
-                    id="youtube-player"
-                    width="100%" 
-                    height="100%" 
-                    src="https://www.youtube.com/embed/T0vMiDZ88Tw?enablejsapi=1&controls=0&showinfo=0&rel=0&modestbranding=1&loop=1&playlist=T0vMiDZ88Tw" 
-                    title="Jewelry Showcase" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen
-                    style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;">
-                </iframe>
-            </div>
-            <!-- Brand overlay (starts hidden) -->
-            <div id="brand-only-overlay" class="brand-overlay active">
+            <video id="apple-style-video" muted playsinline preload="auto">
+                <source src="images/finalvideo.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="brand-overlay">
                 <div class="brand-text">B.BharatKumar</div>
+            </div>
+            <div class="video-loading">
+                <div class="loader"></div>
             </div>
         </div>
     </section>
@@ -95,43 +84,43 @@
                 <div class="gallery-scroll">
                     <!-- First set of items -->
                     <div class="gallery-item">
-                        <img src="images/gold chain.jpg" alt="Gold Chain" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/gold chain.jpg" alt="Gold Chain">
                         <div class="gallery-caption">
                             <h3>Gold Chains</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/weddingonaments.jpg" alt="Wedding Ornaments" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/weddingonaments.jpg" alt="Wedding Ornaments">
                         <div class="gallery-caption">
                             <h3>Wedding Ornaments</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/pyal.jpg" alt="Pyal" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/pyal.jpg" alt="Pyal">
                         <div class="gallery-caption">
                             <h3>Traditional Payals</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/bracelet2.jpg" alt="Bracelet" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/bracelet2.jpg" alt="Bracelet">
                         <div class="gallery-caption">
                             <h3>Classic Bracelets</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/morden neckless.jpg" alt="Modern Necklace" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/morden neckless.jpg" alt="Modern Necklace">
                         <div class="gallery-caption">
                             <h3>Modern Necklaces</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/morden bracelet.jpg" alt="Modern Bracelet" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/morden bracelet.jpg" alt="Modern Bracelet">
                         <div class="gallery-caption">
                             <h3>Modern Bracelets</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/asscries .jpg" alt="Accessories" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/asscries .jpg" alt="Accessories">
                         <div class="gallery-caption">
                             <h3>Jewelry Accessories</h3>
                         </div>
@@ -139,43 +128,43 @@
                     
                     <!-- Duplicate items for infinite loop -->
                     <div class="gallery-item">
-                        <img src="images/gold chain.jpg" alt="Gold Chain" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/gold chain.jpg" alt="Gold Chain">
                         <div class="gallery-caption">
                             <h3>Gold Chains</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/weddingonaments.jpg" alt="Wedding Ornaments" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/weddingonaments.jpg" alt="Wedding Ornaments">
                         <div class="gallery-caption">
                             <h3>Wedding Ornaments</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/pyal.jpg" alt="Pyal" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/pyal.jpg" alt="Pyal">
                         <div class="gallery-caption">
                             <h3>Traditional Payals</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/bracelet2.jpg" alt="Bracelet" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/bracelet2.jpg" alt="Bracelet">
                         <div class="gallery-caption">
                             <h3>Classic Bracelets</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/morden neckless.jpg" alt="Modern Necklace" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/morden neckless.jpg" alt="Modern Necklace">
                         <div class="gallery-caption">
                             <h3>Modern Necklaces</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/morden bracelet.jpg" alt="Modern Bracelet" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/morden bracelet.jpg" alt="Modern Bracelet">
                         <div class="gallery-caption">
                             <h3>Modern Bracelets</h3>
                         </div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/asscries .jpg" alt="Accessories" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+                        <img src="images/asscries .jpg" alt="Accessories">
                         <div class="gallery-caption">
                             <h3>Jewelry Accessories</h3>
                         </div>
@@ -265,6 +254,6 @@
         </div>
     </footer>
 
-    <script src="js/script.js?v=20250330"></script>
+    <script src="js/script.js"></script>
 </body>
 </html> 

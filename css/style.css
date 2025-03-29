@@ -935,14 +935,53 @@ footer {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 1; /* Always visible, not 0 */
-    transition: filter 1s ease, transform 1s ease; /* Longer, smoother transitions */
-    cursor: default; /* Default cursor instead of pointer */
+    opacity: 0.8; /* Slightly transparent for elegance */
+    transition: filter 1s ease, transform 1s ease, opacity 0.5s ease;
+    cursor: default;
 }
 
-/* Make video visible when in view - no longer needed since video is always visible */
+/* Loading state */
+.video-container.loaded video {
+    opacity: 1;
+}
+
+/* Video loading indicator */
+.video-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 5;
+    transition: opacity 0.5s ease;
+}
+
+.video-container.loaded .video-loading {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Loader animation */
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--gold);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Visibility changes when in viewport */
 .video-container.in-view video {
-    /* No changes needed, removing opacity change */
+    opacity: 1;
 }
 
 /* Blur effect when paused */
@@ -951,7 +990,7 @@ footer {
     transform: scale(1.05); /* Subtle zoom effect */
 }
 
-/* Brand overlay that appears when video is paused */
+/* Brand overlay */
 .brand-overlay {
     position: absolute;
     top: 0;
@@ -964,7 +1003,7 @@ footer {
     opacity: 0;
     transition: opacity 0.5s ease;
     z-index: 10;
-    pointer-events: none; /* Prevent interactions */
+    pointer-events: none;
 }
 
 .brand-overlay.visible {
@@ -989,8 +1028,12 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .video-wallpaper {
+        height: 60vh; /* Smaller on mobile */
+    }
+    
     .brand-text {
-        font-size: 3.5rem; /* Reduced from 4.5rem */
+        font-size: 3rem;
     }
 }
 
