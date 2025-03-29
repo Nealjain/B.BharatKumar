@@ -52,9 +52,6 @@ img {
     -o-user-drag: none;
     user-drag: none;
     pointer-events: none;
-    /* Enhanced protection */
-    touch-action: none;
-    -webkit-touch-callout: none;
 }
 
 a {
@@ -135,14 +132,10 @@ header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 95%;
-    max-width: 1200px;
+    width: 100%;
     padding: 0 15px;
     margin: 0 auto;
-}
-
-.logo {
-    padding: 5px 0;
+    max-width: 1200px;
 }
 
 .logo a {
@@ -156,8 +149,7 @@ header .container {
 
 nav ul {
     display: flex;
-    gap: 30px;
-    margin-right: 10px;
+    gap: 20px;
 }
 
 nav ul li a {
@@ -169,11 +161,6 @@ nav ul li a {
     letter-spacing: 1px;
     transition: var(--transition);
     font-family: 'Montserrat', sans-serif;
-    padding: 5px 0;
-}
-
-nav ul li a:hover {
-    color: var(--gold);
 }
 
 .mobile-nav-toggle {
@@ -191,6 +178,48 @@ nav ul li a:hover {
     background-color: var(--dark);
     margin: 5px 0;
     transition: var(--transition);
+}
+
+/* Images should be completely protected */
+img, video {
+    pointer-events: none !important;
+    -webkit-user-drag: none !important;
+    -khtml-user-drag: none !important;
+    -moz-user-drag: none !important;
+    -o-user-drag: none !important;
+    user-drag: none !important;
+    -webkit-touch-callout: none !important;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 768px) {
+    header .container {
+        padding: 0 12px;
+    }
+    
+    .logo a {
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+    
+    nav ul li a {
+        font-size: 0.8rem;
+    }
+    
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header .container {
+        padding: 0 10px;
+    }
+    
+    .logo a {
+        font-size: 0.9rem;
+        letter-spacing: 0.3px;
+    }
 }
 
 /* ========== Hero Section ========== */
@@ -344,6 +373,8 @@ nav ul li a:hover {
     border-radius: 8px;
     box-shadow: var(--shadow);
     flex-shrink: 0;
+    pointer-events: none;
+    user-select: none;
 }
 
 .gallery-item img {
@@ -351,6 +382,7 @@ nav ul li a:hover {
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
+    pointer-events: none !important;
 }
 
 .gallery-item:hover img {
@@ -691,10 +723,6 @@ footer {
         padding: 12px 0;
     }
     
-    .logo a {
-        font-size: 1.3rem;
-    }
-    
     .hero h1 {
         font-size: 3.2rem;
     }
@@ -715,15 +743,16 @@ footer {
 
 @media (max-width: 768px) {
     header {
-        padding: 10px 0;
+        padding: 12px 0;
     }
     
     header .container {
-        padding: 0 10px;
+        padding: 0 12px;
     }
     
     .logo a {
         font-size: 1.1rem;
+        letter-spacing: 0.5px;
     }
     
     .mobile-nav-toggle {
@@ -765,7 +794,7 @@ footer {
     }
     
     nav ul li a {
-        font-size: 1.1rem;
+        font-size: 0.8rem;
         display: block;
         padding: 10px 0;
         width: 100%;
@@ -784,7 +813,7 @@ footer {
     }
     
     .hero h1 {
-        font-size: 2.8rem;
+        font-size: 2rem;
     }
     
     .hero p {
@@ -803,20 +832,40 @@ footer {
     .contact-info {
         gap: 15px;
     }
+    
+    .brand a {
+        font-size: 1.2rem;
+    }
+    
+    .header .container {
+        padding: 0.5rem;
+    }
+    
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .gallery-item:hover img {
+        transform: none;
+    }
+    
+    .gallery-item:hover .gallery-caption {
+        transform: none;
+    }
 }
 
 @media (max-width: 480px) {
     header {
-        padding: 8px 0;
+        padding: 10px 0;
     }
     
     header .container {
-        padding: 0 8px;
+        padding: 0 10px;
     }
     
     .logo a {
         font-size: 0.9rem;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
     }
     
     .section-header h2 {
@@ -835,16 +884,13 @@ footer {
     .brand-text {
         font-size: 3.5rem;
     }
-}
-
-@media (max-width: 350px) {
-    .logo a {
-        font-size: 0.8rem;
-        letter-spacing: 0.3px;
+    
+    .brand a {
+        font-size: 1rem;
     }
     
-    .mobile-nav-toggle span {
-        width: 20px;
+    .header .container {
+        padding: 0.3rem;
     }
 }
 
@@ -882,24 +928,30 @@ footer {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    /* Fallback background in case video doesn't load */
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-                url('../images/weddingonaments.jpg');
-    background-size: cover;
-    background-position: center;
+    pointer-events: none; /* Prevent interactions */
 }
 
 .video-container video {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 0;
+    opacity: 1; /* Always visible, not 0 */
+    transition: filter 1s ease, transform 1s ease; /* Longer, smoother transitions */
+    cursor: default; /* Default cursor instead of pointer */
 }
 
-/* Brand overlay */
+/* Make video visible when in view - no longer needed since video is always visible */
+.video-container.in-view video {
+    /* No changes needed, removing opacity change */
+}
+
+/* Blur effect when paused */
+.video-container.paused video {
+    filter: blur(8px);
+    transform: scale(1.05); /* Subtle zoom effect */
+}
+
+/* Brand overlay that appears when video is paused */
 .brand-overlay {
     position: absolute;
     top: 0;
@@ -909,8 +961,14 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.3);
-    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 10;
+    pointer-events: none; /* Prevent interactions */
+}
+
+.brand-overlay.visible {
+    opacity: 1;
 }
 
 .brand-text {
@@ -921,9 +979,19 @@ footer {
     text-align: center;
     line-height: 1.2;
     text-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: transform 0.5s ease;
     letter-spacing: 2.5px;
-    position: relative;
-    z-index: 2;
+}
+
+.brand-overlay.visible .brand-text {
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .brand-text {
+        font-size: 3.5rem; /* Reduced from 4.5rem */
+    }
 }
 
 header.scrolled {
@@ -944,86 +1012,4 @@ body.menu-open::before {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 90;
-}
-
-/* Play button overlay for video */
-.play-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2;
-    cursor: pointer;
-}
-
-#play-btn {
-    background-color: var(--gold);
-    color: var(--white);
-    border: none;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: var(--transition);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-}
-
-#play-btn:hover {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-/* Hide native video controls until clicked */
-.video-container video::-webkit-media-controls {
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.video-container video:focus::-webkit-media-controls,
-.video-container video.playing::-webkit-media-controls {
-    opacity: 1;
-}
-
-/* Video/Brand Cycle Section */
-#video-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    z-index: 1;
-}
-
-#video-layer.active {
-    opacity: 1;
-}
-
-#brand-only-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.7);
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    z-index: 2;
-}
-
-#brand-only-overlay.active {
-    opacity: 1;
 } 
