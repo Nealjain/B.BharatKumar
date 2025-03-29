@@ -882,30 +882,17 @@ footer {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    pointer-events: none; /* Prevent interactions */
 }
 
 .video-container video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 1; /* Always visible, not 0 */
-    transition: filter 1s ease, transform 1s ease; /* Longer, smoother transitions */
-    cursor: default; /* Default cursor instead of pointer */
+    opacity: 1;
+    z-index: 1;
 }
 
-/* Make video visible when in view - no longer needed since video is always visible */
-.video-container.in-view video {
-    /* No changes needed, removing opacity change */
-}
-
-/* Blur effect when paused */
-.video-container.paused video {
-    filter: blur(8px);
-    transform: scale(1.05); /* Subtle zoom effect */
-}
-
-/* Brand overlay that appears when video is paused */
+/* Brand overlay */
 .brand-overlay {
     position: absolute;
     top: 0;
@@ -915,14 +902,8 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 10;
-    pointer-events: none; /* Prevent interactions */
-}
-
-.brand-overlay.visible {
-    opacity: 1;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .brand-text {
@@ -933,19 +914,7 @@ footer {
     text-align: center;
     line-height: 1.2;
     text-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
-    transform: scale(0.9);
-    transition: transform 0.5s ease;
     letter-spacing: 2.5px;
-}
-
-.brand-overlay.visible .brand-text {
-    transform: scale(1);
-}
-
-@media (max-width: 768px) {
-    .brand-text {
-        font-size: 3.5rem; /* Reduced from 4.5rem */
-    }
 }
 
 header.scrolled {

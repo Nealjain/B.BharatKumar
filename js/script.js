@@ -116,6 +116,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Mobile Navigation
 document.addEventListener('DOMContentLoaded', function() {
+    // Simple video initialization
+    const video = document.getElementById('apple-style-video');
+    if (video) {
+        video.muted = true;
+        video.playsInline = true;
+        video.loop = true;
+        
+        // Force play on page load
+        setTimeout(() => {
+            video.play().catch(e => {
+                console.log('Video play failed:', e);
+            });
+        }, 1000);
+    }
+    
     // Prevent image context menu, dragging, and selection
     document.addEventListener('contextmenu', event => {
         if (event.target.tagName === 'IMG') {
@@ -240,77 +255,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Call once on load and then on resize
     adjustLogoSize();
     window.addEventListener('resize', adjustLogoSize);
-    
-    // Apple-style video wallpaper
-    const videoContainer = document.querySelector('.video-container');
-    const video = document.getElementById('apple-style-video');
-    const brandOverlay = document.querySelector('.brand-overlay');
-    
-    if (video && videoContainer) {
-        // Force video to play regardless of viewport visibility
-        video.muted = true; // Ensure video is muted (required for autoplay)
-        video.playsInline = true;
-        video.autoplay = true;
-        
-        // Try to play immediately
-        var playPromise = video.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                // Playback started successfully
-                console.log("Video playback started");
-                
-                // After 4.5 seconds, smoothly fade out and pause video
-                setTimeout(() => {
-                    // Smooth stop by reducing playback rate gradually
-                    let rate = 1.0;
-                    const fadeInterval = setInterval(() => {
-                        rate -= 0.1;
-                        if (rate <= 0.1) {
-                            clearInterval(fadeInterval);
-                            video.pause();
-                            videoContainer.classList.add('paused');
-                            brandOverlay.classList.add('visible');
-                            
-                            // Restart the cycle after 30 seconds
-                            setTimeout(() => {
-                                videoContainer.classList.remove('paused');
-                                brandOverlay.classList.remove('visible');
-                                video.currentTime = 0;
-                                video.play();
-                            }, 30000);
-                        } else {
-                            video.playbackRate = rate;
-                        }
-                    }, 50);
-                }, 4500);
-            })
-            .catch(error => {
-                // Auto-play was prevented
-                console.log("Video autoplay prevented:", error);
-                // Show the brand overlay immediately as fallback
-                videoContainer.classList.add('paused');
-                brandOverlay.classList.add('visible');
-            });
-        }
-    }
-    
-    // Animation on scroll
-    const animateElements = document.querySelectorAll('.fadeIn');
-    
-    function checkVisible() {
-        animateElements.forEach(el => {
-            const elementTop = el.getBoundingClientRect().top;
-            const elementVisible = 150;
-            
-            if (elementTop < window.innerHeight - elementVisible) {
-                el.classList.add('visible');
-            }
-        });
-    }
-    
-    window.addEventListener('scroll', checkVisible);
-    checkVisible(); // Check on page load
     
     // Handle gallery infinite scrolling
     const galleryScroll = document.querySelector('.gallery-scroll');
