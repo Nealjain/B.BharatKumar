@@ -304,6 +304,36 @@ document.addEventListener('DOMContentLoaded', function() {
             bannerVideo.classList.remove('playing');
         });
     }
+
+    // Ensure video plays like a GIF on all devices
+    const videos = document.querySelectorAll('video');
+    
+    videos.forEach(video => {
+        // Set attributes programmatically
+        video.muted = true;
+        video.playsInline = true;
+        video.loop = true;
+        video.autoplay = true;
+        
+        // Force play on page load
+        video.play().catch(e => {
+            console.log('Video autoplay prevented. This is normal on some browsers.');
+        });
+        
+        // Try to play again on scroll
+        window.addEventListener('scroll', function scrollPlayHandler() {
+            video.play().catch(e => {});
+            // Only try once
+            window.removeEventListener('scroll', scrollPlayHandler);
+        }, {once: true});
+        
+        // Check if video is paused every second and try to restart
+        setInterval(() => {
+            if (video.paused) {
+                video.play().catch(e => {});
+            }
+        }, 1000);
+    });
 });
 
 // Global prevention of right-click and text selection
