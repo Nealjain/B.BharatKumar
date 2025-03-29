@@ -939,4 +939,51 @@ body.menu-open::before {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 90;
+}
+
+/* Play button overlay for video */
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    cursor: pointer;
+}
+
+#play-btn {
+    background-color: var(--gold);
+    color: var(--white);
+    border: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: var(--transition);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+#play-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Hide native video controls until clicked */
+.video-container video::-webkit-media-controls {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.video-container video:focus::-webkit-media-controls,
+.video-container video.playing::-webkit-media-controls {
+    opacity: 1;
 } 

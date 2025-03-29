@@ -266,35 +266,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Play the video no matter what
+    // Custom video player controls
     const bannerVideo = document.getElementById('banner-video');
-    if (bannerVideo) {
-        // Ensure video attributes are set programmatically
-        bannerVideo.muted = true;
-        bannerVideo.loop = true;
-        bannerVideo.playsInline = true;
-        bannerVideo.autoplay = true;
+    const playBtn = document.getElementById('play-btn');
+    const playOverlay = document.querySelector('.play-overlay');
+    
+    if (bannerVideo && playBtn) {
+        // Set video properties
+        bannerVideo.muted = false; // Allow sound since we're using explicit play
         
-        // Try immediately
-        playVideo();
+        // Handle play button click
+        playBtn.addEventListener('click', function() {
+            if (bannerVideo.paused) {
+                bannerVideo.play();
+                bannerVideo.classList.add('playing');
+                playOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    playOverlay.style.display = 'none';
+                }, 500);
+            }
+        });
         
-        // Try again after a short delay
-        setTimeout(playVideo, 1000);
+        // Handle video click to toggle play/pause
+        bannerVideo.addEventListener('click', function() {
+            if (bannerVideo.paused) {
+                bannerVideo.play();
+                bannerVideo.classList.add('playing');
+            } else {
+                bannerVideo.pause();
+            }
+        });
         
-        // And again after another delay
-        setTimeout(playVideo, 3000);
-        
-        // Try on scroll
-        window.addEventListener('scroll', playVideo, {once: true});
-        
-        // Try on click anywhere
-        document.addEventListener('click', playVideo, {once: true});
-        
-        function playVideo() {
-            bannerVideo.play().catch(error => {
-                console.log('Video play attempt:', error);
-            });
-        }
+        // Reset overlay when video ends
+        bannerVideo.addEventListener('ended', function() {
+            playOverlay.style.display = 'flex';
+            playOverlay.style.opacity = '1';
+            bannerVideo.classList.remove('playing');
+        });
     }
 });
 
