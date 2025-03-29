@@ -116,6 +116,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Mobile Navigation
 document.addEventListener('DOMContentLoaded', function() {
+    // Prevent image context menu, dragging, and selection
+    document.addEventListener('contextmenu', event => {
+        if (event.target.tagName === 'IMG') {
+            event.preventDefault();
+            return false;
+        }
+    });
+    
+    document.addEventListener('dragstart', event => {
+        if (event.target.tagName === 'IMG') {
+            event.preventDefault();
+            return false;
+        }
+    });
+    
+    document.addEventListener('selectstart', event => {
+        if (event.target.tagName === 'IMG') {
+            event.preventDefault();
+            return false;
+        }
+    });
+    
+    // Block common keyboard shortcuts for saving images
+    document.addEventListener('keydown', function(event) {
+        // Block Ctrl+S, Ctrl+P, Ctrl+Shift+S
+        if ((event.ctrlKey || event.metaKey) && 
+            (event.key === 's' || event.key === 'p' || 
+             (event.shiftKey && event.key === 's'))) {
+            event.preventDefault();
+            return false;
+        }
+    });
+    
+    // Add guard attribute to all images
+    document.querySelectorAll('img').forEach(img => {
+        img.setAttribute('oncontextmenu', 'return false');
+        img.setAttribute('ondragstart', 'return false');
+        img.setAttribute('onselectstart', 'return false');
+    });
+    
     // Mobile Navigation Toggle
     const menuToggle = document.querySelector('.mobile-nav-toggle');
     const nav = document.querySelector('nav');
@@ -178,6 +218,28 @@ document.addEventListener('DOMContentLoaded', function() {
             header.classList.remove('scrolled');
         }
     });
+    
+    // Responsive logo size
+    function adjustLogoSize() {
+        const logo = document.querySelector('.logo a');
+        if (logo) {
+            if (window.innerWidth <= 350) {
+                logo.style.fontSize = '0.8rem';
+            } else if (window.innerWidth <= 480) {
+                logo.style.fontSize = '0.9rem';
+            } else if (window.innerWidth <= 768) {
+                logo.style.fontSize = '1.1rem';
+            } else if (window.innerWidth <= 992) {
+                logo.style.fontSize = '1.3rem';
+            } else {
+                logo.style.fontSize = '1.6rem';
+            }
+        }
+    }
+    
+    // Call once on load and then on resize
+    adjustLogoSize();
+    window.addEventListener('resize', adjustLogoSize);
     
     // Apple-style video wallpaper
     const videoContainer = document.querySelector('.video-container');
@@ -255,9 +317,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Check initial visibility
         handleVideoVisibility();
-        
-        // Remove all click interactions - video now plays on its own cycle only
-        // No click functionality
     }
     
     // Animation on scroll
@@ -288,6 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Prevent right-clicking and text selection
+// Global prevention of right-click and text selection
 document.addEventListener('contextmenu', event => event.preventDefault());
 document.addEventListener('selectstart', event => event.preventDefault()); 

@@ -52,6 +52,9 @@ img {
     -o-user-drag: none;
     user-drag: none;
     pointer-events: none;
+    /* Enhanced protection */
+    touch-action: none;
+    -webkit-touch-callout: none;
 }
 
 a {
@@ -144,6 +147,7 @@ header .container {
     color: var(--gold);
     letter-spacing: 0.8px;
     font-family: 'Cinzel', serif;
+    transition: var(--transition);
 }
 
 nav ul {
@@ -677,6 +681,10 @@ footer {
         padding: 12px 0;
     }
     
+    .logo a {
+        font-size: 1.3rem;
+    }
+    
     .hero h1 {
         font-size: 3.2rem;
     }
@@ -697,7 +705,7 @@ footer {
 
 @media (max-width: 768px) {
     header {
-        padding: 12px 0;
+        padding: 10px 0;
     }
     
     header .container {
@@ -705,7 +713,7 @@ footer {
     }
     
     .logo a {
-        font-size: 1.4rem;
+        font-size: 1.1rem;
     }
     
     .mobile-nav-toggle {
@@ -785,23 +793,11 @@ footer {
     .contact-info {
         gap: 15px;
     }
-    
-    .brand a {
-        font-size: 1.2rem;
-    }
-    
-    .header .container {
-        padding: 0.5rem;
-    }
-    
-    .hero-content h1 {
-        font-size: 2rem;
-    }
 }
 
 @media (max-width: 480px) {
     header {
-        padding: 10px 0;
+        padding: 8px 0;
     }
     
     header .container {
@@ -809,7 +805,8 @@ footer {
     }
     
     .logo a {
-        font-size: 1.2rem;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
     }
     
     .section-header h2 {
@@ -828,13 +825,16 @@ footer {
     .brand-text {
         font-size: 3.5rem;
     }
-    
-    .brand a {
-        font-size: 1rem;
+}
+
+@media (max-width: 350px) {
+    .logo a {
+        font-size: 0.8rem;
+        letter-spacing: 0.3px;
     }
     
-    .header .container {
-        padding: 0.3rem;
+    .mobile-nav-toggle span {
+        width: 20px;
     }
 }
 
