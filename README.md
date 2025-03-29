@@ -1,6 +1,26 @@
 # B.BharatKumar Jewelry Shop
 
-A static website for B.BharatKumar, a premium jewelry shop located in Dongri, Mumbai.
+This is the official website for B.BharatKumar Jewelry Shop, featuring our elegant collection of fine jewelry.
+
+## Features
+
+- Elegant and responsive design
+- Showcase of our jewelry collection
+- Auto-scrolling gallery display
+- Contact information and location
+
+## Technologies Used
+
+- HTML5
+- CSS3
+- JavaScript
+- Font Awesome icons
+- Google Fonts
+- Google Maps integration
+
+## Deployment
+
+The website is hosted on GitHub Pages and can be accessed at [YOUR_USERNAME.github.io/B.BharatKumar](https://YOUR_USERNAME.github.io/B.BharatKumar).
 
 ## Description
 
@@ -12,26 +32,10 @@ This is a single-page website showcasing the products and services offered by B.
 - Store location with Google Maps integration
 - Contact information
 
-## Technologies Used
-
-- HTML5
-- CSS3
-- JavaScript (ES6)
-- Font Awesome for icons
-- Google Maps API for location
-
 ## How to View the Website
 
 1. Open the `index.html` file in any modern web browser.
 2. Alternatively, you can deploy this website to any web hosting service.
-
-## Features
-
-- Responsive design that works on all devices
-- Clean and modern UI focused on showcasing jewelry
-- Smooth scrolling navigation
-- Interactive Google Maps integration
-- Mobile-friendly layout
 
 ## Customization
 
