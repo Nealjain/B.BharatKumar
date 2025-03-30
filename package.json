@@ -1,0 +1,21 @@
+{
+  "name": "b-bharatkumar-auto-enhancer",
+  "version": "1.0.0",
+  "description": "Automatic website enhancement tool for B.BharatKumar jewelry shop",
+  "main": "auto-enhance.js",
+  "scripts": {
+    "start": "node auto-enhance.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "auto-enhancement",
+    "website",
+    "ai",
+    "jewelry"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
