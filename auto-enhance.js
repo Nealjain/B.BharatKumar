@@ -27,13 +27,16 @@ const CONFIG = {
         { path: 'index.html', weight: 2 }
     ],
     improvementTypes: [
+        { name: 'Enhance brand identity', weight: 5 },
+        { name: 'Improve letter animations', weight: 5 },
+        { name: 'Add futuristic features', weight: 4 },
         { name: 'Add subtle animations', weight: 2 },
         { name: 'Improve mobile responsiveness', weight: 3 },
         { name: 'Optimize performance', weight: 2 },
         { name: 'Enhance visual appeal', weight: 3 },
         { name: 'Add accessibility features', weight: 2 },
-        { name: 'Ensure showcase-only compliance', weight: 4 }, // Higher weight for compliance
-        { name: 'Fix UI errors', weight: 5 }  // Highest priority for error fixing
+        { name: 'Ensure showcase-only compliance', weight: 4 },
+        { name: 'Fix UI errors', weight: 5 }
     ],
     enhancementLog: 'enhancement-log.json',
     // Business requirements
@@ -84,7 +87,109 @@ const CONFIG = {
                 fix: 'syntax-error'
             }
         ]
-    }
+    },
+    updateTracking: {
+        enabled: true,
+        logFile: 'updates.txt',
+        maintenanceMode: {
+            enabled: true,
+            thresholdUpdates: 5, // Number of updates that trigger maintenance mode
+            maintenanceFile: 'maintenance.html',
+            maintenanceTemplate: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B.BharatKumar - Maintenance</title>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .maintenance-container {
+            max-width: 600px;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #D4AF37;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .gold-text {
+            color: #D4AF37;
+            font-weight: 500;
+        }
+        .timer {
+            font-size: 1.2rem;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: #D4AF37;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="maintenance-container">
+        <div class="logo">B.BharatKumar</div>
+        <h1>We're Making Something Beautiful</h1>
+        <p>Our website is currently undergoing enhancements to provide you with an even better experience. We'll be back shortly with a refreshed look.</p>
+        <p>Thank you for your patience.</p>
+        <p class="gold-text">Since 1950s</p>
+        <div class="timer" id="countdown">Estimated time: <span id="time">5:00</span></div>
+    </div>
+    <script>
+        // Countdown timer
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+                
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                
+                display.textContent = minutes + ":" + seconds;
+                
+                if (--timer < 0) {
+                    timer = 0;
+                    window.location.reload();
+                }
+            }, 1000);
+        }
+        
+        window.onload = function () {
+            var fiveMinutes = 60 * 5,
+                display = document.querySelector('#time');
+            startTimer(fiveMinutes, display);
+        };
+    </script>
+</body>
+</html>`
+        },
+        autoPush: true
+    },
 };
 
 // Utility to execute shell commands
@@ -178,16 +283,32 @@ function generateEnhancement(filePath, improvementType) {
         file: filePath,
         type: improvementType,
         description: `Enhanced ${path.basename(filePath)} with ${improvementType.toLowerCase()}`,
-        changes: []
+        changes: [],
+        scriptChanges: null
     };
     
-    // Simple enhancements based on file type and improvement type
-    if (fileExtension === '.css') {
-        enhancement = generateCssEnhancement(fileContent, improvementType, enhancement);
-    } else if (fileExtension === '.js') {
-        enhancement = generateJsEnhancement(fileContent, improvementType, enhancement);
-    } else if (fileExtension === '.html') {
-        enhancement = generateHtmlEnhancement(fileContent, improvementType, enhancement);
+    // Generate enhancements based on improvement type and file type
+    if (improvementType === 'Enhance brand identity') {
+        if (fileExtension === '.css') {
+            enhancement = generateBrandIdentityEnhancement(fileContent, enhancement);
+        }
+    } else if (improvementType === 'Improve letter animations') {
+        if (fileExtension === '.css') {
+            enhancement = generateLetterAnimationEnhancement(fileContent, enhancement);
+        }
+    } else if (improvementType === 'Add futuristic features') {
+        if (fileExtension === '.css') {
+            enhancement = generateFuturisticFeaturesEnhancement(fileContent, enhancement);
+        }
+    } else {
+        // Existing enhancement generation logic
+        if (fileExtension === '.css') {
+            enhancement = generateCssEnhancement(fileContent, improvementType, enhancement);
+        } else if (fileExtension === '.js') {
+            enhancement = generateJsEnhancement(fileContent, improvementType, enhancement);
+        } else if (fileExtension === '.html') {
+            enhancement = generateHtmlEnhancement(fileContent, improvementType, enhancement);
+        }
     }
     
     return enhancement;
@@ -920,24 +1041,69 @@ function applyEnhancement(enhancement) {
 // Commit and push changes
 async function commitAndPushChanges(enhancement) {
     try {
-        console.log('Committing changes...');
+        // First log the update
+        logUpdate(enhancement);
         
-        // Add file to git
-        await executeCommand(`git add ${enhancement.file}`);
+        // Skip if auto-push is disabled
+        if (!CONFIG.updateTracking.autoPush) {
+            console.log('Auto-push is disabled. Skipping commit and push.');
+            return true;
+        }
         
-        // Commit with message
+        console.log('Starting git operations...');
+        
+        // Make sure we're on the main branch
+        await executeCommand('git checkout main || git checkout master');
+        
+        // Pull latest changes to avoid conflicts
+        console.log('Pulling latest changes...');
+        await executeCommand('git pull --rebase');
+        
         const commitMessage = `${CONFIG.commitMessage}: ${enhancement.description}`;
+        
+        // Add the changed file
+        console.log(`Adding file: ${enhancement.file}`);
+        await executeCommand(`git add "${enhancement.file}"`);
+        
+        // Add the updates log file
+        if (fs.existsSync(CONFIG.updateTracking.logFile)) {
+            console.log(`Adding update log: ${CONFIG.updateTracking.logFile}`);
+            await executeCommand(`git add "${CONFIG.updateTracking.logFile}"`);
+        }
+        
+        // Commit the changes
+        console.log('Committing changes...');
         await executeCommand(`git commit -m "${commitMessage}"`);
         
-        // Push to remote
-        console.log('Pushing changes...');
-        await executeCommand('git push origin main');
+        // Force push to ensure changes are applied
+        console.log('Pushing changes to remote repository...');
+        await executeCommand('git push --force-with-lease');
         
-        console.log('Successfully committed and pushed changes.');
+        // Create a force-rebuild.html file with current timestamp to trigger GitHub Pages rebuild
+        const timestamp = new Date().toISOString();
+        fs.writeFileSync('force-rebuild.html', `<!-- Force rebuild: ${timestamp} -->`);
+        
+        // Add and commit the force-rebuild file
+        await executeCommand('git add force-rebuild.html');
+        await executeCommand('git commit -m "Force rebuild GitHub Pages"');
+        await executeCommand('git push --force-with-lease');
+        
+        console.log('Changes committed and pushed successfully. GitHub Pages rebuild triggered.');
         return true;
     } catch (err) {
         console.error('Error committing and pushing changes:', err);
-        return false;
+        // Try again with different approach if the first attempt failed
+        try {
+            console.log('Trying alternative push approach...');
+            await executeCommand('git add .');
+            await executeCommand(`git commit -m "Auto-update: ${enhancement.description}"`);
+            await executeCommand('git push');
+            console.log('Alternative push completed successfully');
+            return true;
+        } catch (retryErr) {
+            console.error('Error in alternative push approach:', retryErr);
+            return false;
+        }
     }
 }
 
@@ -1509,6 +1675,34 @@ async function runEnhancement() {
     return true;
 }
 
+// Add new function to trigger GitHub Pages deployment
+async function triggerGitHubPagesDeployment() {
+    console.log('Triggering GitHub Pages deployment...');
+    
+    try {
+        // Create a temporary file with current timestamp
+        const timestamp = new Date().toISOString();
+        fs.writeFileSync('github-pages-trigger.html', `<!-- GitHub Pages rebuild trigger: ${timestamp} -->`);
+        
+        // Add, commit and push the file
+        await executeCommand('git add github-pages-trigger.html');
+        await executeCommand('git commit -m "Trigger GitHub Pages rebuild"');
+        await executeCommand('git push');
+        
+        // Remove the temporary file
+        await executeCommand('git rm github-pages-trigger.html');
+        await executeCommand('git commit -m "Remove rebuild trigger file"');
+        await executeCommand('git push');
+        
+        console.log('GitHub Pages deployment triggered successfully!');
+        console.log('Your website should be updated within 1-2 minutes.');
+        return true;
+    } catch (err) {
+        console.error('Error triggering GitHub Pages deployment:', err);
+        return false;
+    }
+}
+
 // Start enhancement process
 async function startEnhancement() {
     try {
@@ -1542,6 +1736,10 @@ function startCLI() {
     console.log('Commands:');
     console.log('  run - Run enhancement process immediately');
     console.log('  log - View enhancement history');
+    console.log('  deploy - Trigger GitHub Pages deployment immediately');
+    console.log('  direct - Direct deployment to GitHub Pages (recommended)');
+    console.log('  push - Force push all changes');
+    console.log('  status - Check git status and deployment');
     console.log('  exit - Exit the program');
     console.log('');
     
@@ -1563,12 +1761,46 @@ function startCLI() {
                     });
                 }
                 promptCommand();
+            } else if (answer === 'deploy') {
+                console.log('Triggering GitHub Pages deployment...');
+                await triggerGitHubPagesDeployment();
+                promptCommand();
+            } else if (answer === 'direct') {
+                console.log('Starting direct deployment to GitHub Pages...');
+                await directDeploy("Manual direct deployment");
+                promptCommand();
+            } else if (answer === 'push') {
+                console.log('Force pushing all changes...');
+                try {
+                    await executeCommand('git add .');
+                    await executeCommand('git commit -m "Manual: Force push all changes"');
+                    await executeCommand('git push --force-with-lease');
+                    console.log('All changes pushed successfully!');
+                } catch (err) {
+                    console.error('Error pushing changes:', err);
+                }
+                promptCommand();
+            } else if (answer === 'status') {
+                console.log('Checking git status...');
+                try {
+                    const status = await executeCommand('git status');
+                    console.log(status);
+                    
+                    // Check if GitHub Pages is enabled
+                    console.log('Checking deployment status...');
+                    const branch = await executeCommand('git rev-parse --abbrev-ref HEAD');
+                    console.log(`Current branch: ${branch.trim()}`);
+                    console.log('Note: Ensure GitHub Pages is enabled in repository settings.');
+                } catch (err) {
+                    console.error('Error checking status:', err);
+                }
+                promptCommand();
             } else if (answer === 'exit') {
                 console.log('Exiting...');
                 rl.close();
                 process.exit(0);
             } else {
-                console.log('Unknown command. Available commands: run, log, exit');
+                console.log('Unknown command. Available commands: run, log, deploy, direct, push, status, exit');
                 promptCommand();
             }
         });
@@ -1582,4 +1814,536 @@ function startCLI() {
 }
 
 // Start the application
-startCLI(); 
+startCLI();
+
+// Add these new functions after the existing generateEnhancement function
+
+// Add this after the existing generateHtmlEnhancement function
+function generateBrandIdentityEnhancement(fileContent, enhancement) {
+    // Define brand colors
+    const brandColors = {
+        primary: '#D4AF37', // Gold
+        secondary: '#121212', // Dark
+        accent: '#8A6D3B', // Dark gold
+        light: '#F8F4E3', // Light cream
+        dark: '#0A0A0A' // Near black
+    };
+
+    // Add brand identity improvements
+    enhancement.changes.push({
+        type: 'add',
+        location: 'after_match',
+        search: ':root {',
+        addition: `
+    /* Brand Identity Colors */
+    --brand-gold: ${brandColors.primary};
+    --brand-gold-rgb: 212, 175, 55;
+    --brand-dark: ${brandColors.secondary};
+    --brand-dark-rgb: 18, 18, 18;
+    --brand-accent: ${brandColors.accent};
+    --brand-light: ${brandColors.light};
+    --brand-near-black: ${brandColors.dark};
+    --font-primary: 'Cormorant Garamond', serif;
+    --font-secondary: 'Montserrat', sans-serif;
+    --font-accent: 'Cinzel', serif;`
+    });
+    
+    enhancement.description = 'Enhanced brand identity with consistent color variables and typography';
+    
+    return enhancement;
+}
+
+// Add this after the existing generateHtmlEnhancement function
+function generateLetterAnimationEnhancement(fileContent, enhancement) {
+    if (fileContent.includes('.brand-text') && fileContent.includes('.brand-tagline')) {
+        // Improved letter-by-letter animation for brand text
+        enhancement.changes.push({
+            type: 'replace',
+            search: /\.brand-text {[\s\S]+?}/,
+            replacement: `.brand-text {
+    font-family: var(--font-accent, 'Cinzel', serif);
+    color: var(--brand-gold, #D4AF37);
+    font-size: 3.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}`
+        });
+        
+        enhancement.changes.push({
+            type: 'replace',
+            search: /\.brand-tagline {[\s\S]+?}/,
+            replacement: `.brand-tagline {
+    font-family: var(--font-secondary, 'Montserrat', sans-serif);
+    color: var(--brand-light, #F8F4E3);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}`
+        });
+        
+        // Add letter-by-letter animation
+        enhancement.changes.push({
+            type: 'add',
+            location: 'after_match',
+            search: '/* Mobile responsiveness */',
+            addition: `
+/* Letter Animation */
+.animate-letters .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.animate-letters.visible .letter {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.brand-text .letter {
+    animation-name: letterFadeIn;
+    animation-fill-mode: forwards;
+    animation-duration: 0.4s;
+    opacity: 0;
+}
+
+.brand-tagline .letter {
+    animation-name: letterFadeIn;
+    animation-fill-mode: forwards;
+    animation-duration: 0.4s;
+    opacity: 0;
+}
+
+@keyframes letterFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}`
+        });
+        
+        // Add JavaScript code to split text into letters
+        enhancement.scriptChanges = `
+// Add letter-by-letter animation
+function animateLetters() {
+    const elements = document.querySelectorAll('.brand-text, .brand-tagline');
+    
+    elements.forEach(element => {
+        const text = element.textContent;
+        let html = '';
+        
+        // Split text into letters
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === ' ') {
+                html += ' ';
+            } else {
+                const delay = i * 0.05; // 50ms delay between each letter
+                html += \`<span class="letter" style="animation-delay: \${delay}s">\${text[i]}</span>\`;
+            }
+        }
+        
+        element.innerHTML = html;
+        element.classList.add('animate-letters');
+    });
+}
+
+// Call function when video section is in view
+const videoSection = document.getElementById('video-wallpaper');
+const brandOverlay = document.querySelector('.brand-overlay');
+
+if (videoSection && brandOverlay) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    brandOverlay.classList.add('visible');
+                    animateLetters();
+                }, 500);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    observer.observe(videoSection);
+}`;
+        
+        enhancement.description = 'Improved letter-by-letter animation for brand identity';
+    }
+    
+    return enhancement;
+}
+
+// Add this after the existing generateHtmlEnhancement function
+function generateFuturisticFeaturesEnhancement(fileContent, enhancement) {
+    // Add futuristic features like parallax scrolling, 3D hover effects, etc.
+    
+    // Add JavaScript for parallax scrolling effect
+    enhancement.scriptChanges = `
+// Parallax scrolling effect
+function initParallaxEffect() {
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        
+        // Parallax for hero section
+        const heroSection = document.querySelector('.hero');
+        if (heroSection) {
+            heroSection.style.backgroundPositionY = \`\${scrolled * 0.5}px\`;
+        }
+        
+        // Subtle parallax for collection items
+        const collectionItems = document.querySelectorAll('.gallery-item img');
+        collectionItems.forEach(item => {
+            const parent = item.closest('.gallery-item');
+            const rect = parent.getBoundingClientRect();
+            const centerY = rect.top + rect.height / 2;
+            const viewportCenter = window.innerHeight / 2;
+            const distanceFromCenter = (centerY - viewportCenter) * 0.05;
+            
+            item.style.transform = \`translateY(\${distanceFromCenter}px) scale(1.1)\`;
+        });
+    });
+}
+
+// 3D hover effect for gallery items
+function init3DHoverEffect() {
+    const items = document.querySelectorAll('.gallery-item');
+    
+    items.forEach(item => {
+        item.addEventListener('mousemove', handleHover3D);
+        item.addEventListener('mouseleave', resetHover3D);
+    });
+}
+
+function handleHover3D(e) {
+    const item = this;
+    const rect = item.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const angleX = (y - centerY) / 20;
+    const angleY = (centerX - x) / 20;
+    
+    item.style.transform = \`perspective(1000px) rotateX(\${angleX}deg) rotateY(\${angleY}deg) scale3d(1.05, 1.05, 1.05)\`;
+    item.style.transition = 'transform 0.1s ease';
+    
+    // Add shadow based on tilt
+    const shadow = \`0 \${Math.abs(angleX) * 2}px \${Math.abs(angleY) * 2}px rgba(0,0,0,0.2)\`;
+    item.style.boxShadow = shadow;
+}
+
+function resetHover3D() {
+    this.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    this.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
+    this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+}
+
+// Initialize futuristic features
+document.addEventListener('DOMContentLoaded', () => {
+    initParallaxEffect();
+    init3DHoverEffect();
+});`;
+    
+    // Add CSS for futuristic effects
+    enhancement.changes.push({
+        type: 'add',
+        location: 'after_match',
+        search: '/* Mobile responsiveness */',
+        addition: `
+/* Futuristic Features */
+.gallery-item {
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    overflow: visible;
+}
+
+.gallery-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(var(--brand-gold-rgb), 0.2) 0%, rgba(var(--brand-dark-rgb), 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    border-radius: 10px;
+}
+
+.gallery-item:hover::before {
+    opacity: 1;
+}
+
+.gallery-caption {
+    transform: translateZ(30px);
+    backface-visibility: hidden;
+}
+
+/* Add smooth scrolling to the whole page */
+html {
+    scroll-behavior: smooth;
+}`
+    });
+    
+    enhancement.description = 'Added futuristic features including parallax scrolling and 3D hover effects';
+    
+    return enhancement;
+}
+
+// Update applyEnhancement function to handle scriptChanges
+function applyEnhancement(enhancement) {
+    try {
+        const filePath = enhancement.file;
+        const fileContent = readFile(filePath);
+        
+        if (!fileContent) {
+            console.error(`Could not read file: ${filePath}`);
+            return false;
+        }
+        
+        let updatedContent = fileContent;
+        
+        // Apply each change
+        for (const change of enhancement.changes) {
+            if (change.type === 'replace') {
+                updatedContent = updatedContent.replace(change.search, change.replacement);
+            } else if (change.type === 'add') {
+                if (change.location === 'start') {
+                    updatedContent = change.addition + updatedContent;
+                } else if (change.location === 'end') {
+                    updatedContent = updatedContent + change.addition;
+                } else if (change.location === 'after_match') {
+                    const matchIndex = updatedContent.indexOf(change.search);
+                    if (matchIndex !== -1) {
+                        const endOfMatchIndex = matchIndex + change.search.length;
+                        updatedContent = updatedContent.substring(0, endOfMatchIndex) + change.addition + updatedContent.substring(endOfMatchIndex);
+                    }
+                } else if (change.location === 'before_match') {
+                    const matchIndex = updatedContent.indexOf(change.search);
+                    if (matchIndex !== -1) {
+                        updatedContent = updatedContent.substring(0, matchIndex) + change.addition + updatedContent.substring(matchIndex);
+                    }
+                }
+            }
+        }
+        
+        // Handle script changes if they exist
+        if (enhancement.scriptChanges && filePath.endsWith('.js')) {
+            // Find a good place to insert the new script (before the last line that has a closing function or right before the last line)
+            const lines = updatedContent.split('\n');
+            let insertIndex = lines.length - 1;
+            
+            // Look for a good insertion point - before the last closing brace or event handler
+            for (let i = lines.length - 1; i >= 0; i--) {
+                if (lines[i].includes('DOMContentLoaded') || lines[i].includes('window.onload')) {
+                    // Found an event handler, insert the script changes inside it, right after the opening brace
+                    for (let j = i; j < lines.length; j++) {
+                        if (lines[j].includes('{')) {
+                            insertIndex = j + 1;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            
+            // Insert the script changes
+            lines.splice(insertIndex, 0, enhancement.scriptChanges);
+            updatedContent = lines.join('\n');
+        }
+        
+        // Write updated content back to file
+        fs.writeFileSync(filePath, updatedContent, 'utf-8');
+        
+        console.log(`Applied enhancement to ${filePath}`);
+        return true;
+    } catch (err) {
+        console.error(`Error applying enhancement to ${enhancement.file}:`, err);
+        return false;
+    }
+}
+
+// Add these functions for update tracking
+function logUpdate(enhancement) {
+    if (!CONFIG.updateTracking.enabled) return;
+    
+    try {
+        // Create timestamp
+        const timestamp = new Date().toISOString();
+        
+        // Format update message
+        const updateMessage = `[${timestamp}] ${enhancement.description}\n` +
+            `File: ${enhancement.file}\n` +
+            `Type: ${enhancement.type}\n` +
+            `Changes: ${enhancement.changes.length}\n` +
+            `-----------------------------------------\n`;
+        
+        // Append to updates.txt
+        fs.appendFileSync(CONFIG.updateTracking.logFile, updateMessage);
+        console.log(`Logged update to ${CONFIG.updateTracking.logFile}`);
+        
+        // Check if we should enable maintenance mode
+        checkMaintenanceMode();
+    } catch (err) {
+        console.error('Error logging update:', err);
+    }
+}
+
+function checkMaintenanceMode() {
+    if (!CONFIG.updateTracking.maintenanceMode.enabled) return;
+    
+    try {
+        // Count recent updates (updates in last hour)
+        let updateContent = '';
+        if (fs.existsSync(CONFIG.updateTracking.logFile)) {
+            updateContent = fs.readFileSync(CONFIG.updateTracking.logFile, 'utf-8');
+        }
+        
+        // Get timestamp from one hour ago
+        const oneHourAgo = new Date();
+        oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+        
+        // Count updates in the last hour
+        const recentUpdates = updateContent.split('[')
+            .filter(line => {
+                if (!line.trim()) return false;
+                try {
+                    const timestamp = new Date(line.split(']')[0]);
+                    return timestamp > oneHourAgo;
+                } catch (e) {
+                    return false;
+                }
+            }).length;
+        
+        console.log(`Recent updates in the last hour: ${recentUpdates}`);
+        
+        // Check if we should enable maintenance mode
+        if (recentUpdates >= CONFIG.updateTracking.maintenanceMode.thresholdUpdates) {
+            console.log('Enabling maintenance mode due to high number of updates');
+            enableMaintenanceMode();
+        } else if (isMaintenanceModeEnabled()) {
+            // Check if we should disable maintenance mode
+            console.log('Disabling maintenance mode as update frequency has decreased');
+            disableMaintenanceMode();
+        }
+    } catch (err) {
+        console.error('Error checking maintenance mode:', err);
+    }
+}
+
+function isMaintenanceModeEnabled() {
+    // Check if index.html is renamed to index.original.html
+    return fs.existsSync('index.original.html');
+}
+
+function enableMaintenanceMode() {
+    if (isMaintenanceModeEnabled()) return; // Already in maintenance mode
+    
+    try {
+        // Backup original index.html
+        fs.renameSync('index.html', 'index.original.html');
+        
+        // Create maintenance page
+        fs.writeFileSync('index.html', CONFIG.updateTracking.maintenanceMode.maintenanceTemplate);
+        
+        console.log('Maintenance mode enabled');
+    } catch (err) {
+        console.error('Error enabling maintenance mode:', err);
+    }
+}
+
+function disableMaintenanceMode() {
+    if (!isMaintenanceModeEnabled()) return; // Not in maintenance mode
+    
+    try {
+        // Delete maintenance page
+        fs.unlinkSync('index.html');
+        
+        // Restore original index.html
+        fs.renameSync('index.original.html', 'index.html');
+        
+        console.log('Maintenance mode disabled');
+    } catch (err) {
+        console.error('Error disabling maintenance mode:', err);
+    }
+}
+
+// Add function to directly deploy changes to GitHub Pages
+async function directDeploy(message = "Direct deployment from auto-enhancer") {
+    console.log('Starting direct deployment to GitHub Pages...');
+    
+    try {
+        // Get GitHub Pages branch (gh-pages or main/master)
+        const currentBranch = (await executeCommand('git rev-parse --abbrev-ref HEAD')).trim();
+        console.log(`Current branch: ${currentBranch}`);
+        
+        // Add all files to staging
+        await executeCommand('git add .');
+        
+        // Commit all changes
+        await executeCommand(`git commit -m "Deploy: ${message}"`);
+        
+        // Push to GitHub with force option to ensure update
+        await executeCommand('git push --force origin HEAD');
+        
+        // Create a CNAME file if it doesn't exist (helps with custom domains)
+        if (!fs.existsSync('CNAME')) {
+            // Only create if there's likely a custom domain
+            const hasCustomDomain = fs.existsSync('_config.yml') || 
+                                     fs.existsSync('.nojekyll');
+            
+            if (hasCustomDomain) {
+                // Try to determine domain name from config or leave empty for manual setting
+                fs.writeFileSync('CNAME', '');
+                
+                await executeCommand('git add CNAME');
+                await executeCommand('git commit -m "Add CNAME file for custom domain"');
+                await executeCommand('git push origin HEAD');
+            }
+        }
+        
+        // Create or update .nojekyll file to disable Jekyll processing
+        fs.writeFileSync('.nojekyll', '');
+        await executeCommand('git add .nojekyll');
+        await executeCommand('git commit -m "Add .nojekyll file to disable Jekyll processing"');
+        await executeCommand('git push origin HEAD');
+        
+        console.log('\nWebsite changes have been deployed successfully!');
+        console.log('Your website will be available at:');
+        console.log('  https://[username].github.io/B.BharatKumar/');
+        console.log('\nIf you\'ve configured a custom domain in GitHub Pages settings,');
+        console.log('your website will be available at your custom domain.');
+        console.log('\nNOTE: It may take a few minutes for changes to be visible.');
+        
+        return true;
+    } catch (err) {
+        console.error('Error during direct deployment:', err);
+        
+        // Attempt recovery
+        try {
+            console.log('Attempting recovery...');
+            await executeCommand('git add .');
+            await executeCommand('git commit -m "Recovery commit"');
+            await executeCommand('git push origin HEAD');
+        } catch (recoveryErr) {
+            console.error('Recovery attempt failed:', recoveryErr);
+        }
+        
+        return false;
+    }
+}
+ 

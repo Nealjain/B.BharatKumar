@@ -22,13 +22,40 @@ This is the official website for B.BharatKumar Jewelry Shop, featuring our elega
 
 The website is hosted on GitHub Pages and can be accessed at [YOUR_USERNAME.github.io/B.BharatKumar](https://YOUR_USERNAME.github.io/B.BharatKumar).
 
+### Deploying Changes
+
+To deploy changes to the website, you have several options:
+
+1. **Regular Git Workflow**:
+   ```
+   git add .
+   git commit -m "Your commit message"
+   git push
+   ```
+
+2. **Using the Auto-Enhancer Tool**:
+   ```
+   # If Node.js is not installed, install it first from nodejs.org
+   
+   # Run the auto-enhancer
+   node auto-enhance.js
+   
+   # Select 'direct' command when prompted to immediately deploy changes
+   ```
+
+3. **Manual Direct Deployment**:
+   - Make your changes to the website files
+   - Create or edit `.nojekyll` file in the root directory to disable Jekyll processing
+   - Push changes to the `gh-pages` branch or the branch configured for GitHub Pages
+
+After deployment, changes should be visible on your GitHub Pages site within 1-2 minutes.
+
 ## Description
 
 This is a single-page website showcasing the products and services offered by B.BharatKumar jewelry shop. The website includes sections for:
 
 - About the shop
 - Jewelry collection
-- Services offered
 - Store location with Google Maps integration
 - Contact information
 
