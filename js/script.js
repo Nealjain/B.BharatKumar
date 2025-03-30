@@ -143,11 +143,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Close mobile nav when clicking outside
     document.addEventListener('click', function(e) {
-        // Skip if clicking on language selector
-        if (e.target.closest('.language-selector')) {
-            return;
-        }
-        
         if (nav.classList.contains('active') && 
             !e.target.closest('nav') && 
             !e.target.closest('.mobile-nav-toggle')) {
@@ -156,21 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
             body.classList.remove('menu-open');
         }
     });
-    
-    // Preserve language selection when navigating
-    const languageDropdown = document.getElementById('language-dropdown');
-    if (languageDropdown) {
-        // Store the selected language in localStorage
-        languageDropdown.addEventListener('change', function() {
-            localStorage.setItem('preferred-language', this.value);
-        });
-        
-        // Set the dropdown to the saved language on page load
-        const savedLanguage = localStorage.getItem('preferred-language');
-        if (savedLanguage) {
-            languageDropdown.value = savedLanguage;
-        }
-    }
 });
 
 // Smooth Scrolling for anchor links

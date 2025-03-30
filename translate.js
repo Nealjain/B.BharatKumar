@@ -1,6 +1,6 @@
 /**
  * B.BharatKumar Website Translation System
- * This script handles translation of the website content to multiple languages
+ * This script handles automatic translation based on user's browser language
  */
 
 // Available languages configuration
@@ -21,16 +21,35 @@ const languages = [
 // Translation data - will be loaded from JSON files
 let translations = {};
 
-// Current language
-let currentLanguage = localStorage.getItem('preferred-language') || 'en';
+// Get browser language and determine best match from available languages
+function detectUserLanguage() {
+  // Get user's browser language preference (e.g., 'en-US', 'hi', etc.)
+  const browserLang = navigator.language || navigator.userLanguage || 'en';
+  
+  // Extract the primary language code (e.g., 'en' from 'en-US')
+  const primaryLang = browserLang.split('-')[0];
+  
+  console.log(`Browser language detected: ${browserLang}, primary: ${primaryLang}`);
+  
+  // Check if we support this language
+  const languageMatch = languages.find(lang => lang.code === primaryLang);
+  
+  // Return the matched language code or 'en' as fallback
+  return languageMatch ? primaryLang : 'en';
+}
+
+// Get user's preferred language
+const userLanguage = localStorage.getItem('preferred-language');
+// Current language - auto-detect if not set
+let currentLanguage = userLanguage || detectUserLanguage();
 
 // Initialize the translation system
 async function initTranslation() {
   try {
-    console.log('Initializing translation system...');
+    console.log('Initializing automatic translation system...');
     
-    // Create language selector
-    createLanguageSelector();
+    // Add English toggle button (hidden in footer)
+    addEnglishToggle();
     
     // Load translations for current language
     const success = await loadTranslation(currentLanguage);
@@ -59,57 +78,40 @@ async function initTranslation() {
   }
 }
 
-// Create language dropdown in the header
-function createLanguageSelector() {
-  const header = document.querySelector('header .container');
+// Add a small English toggle link in the footer
+function addEnglishToggle() {
+  const footerBottom = document.querySelector('.footer-bottom');
   
-  if (!header) {
-    console.error('Header container not found');
+  if (!footerBottom) {
+    console.warn('Footer bottom not found, cannot add English toggle');
     return;
   }
   
-  // Create language selector container
-  const langSelector = document.createElement('div');
-  langSelector.className = 'language-selector';
-  
-  // Create dropdown
-  const dropdown = document.createElement('select');
-  dropdown.id = 'language-dropdown';
-  dropdown.setAttribute('aria-label', 'Select language');
-  
-  // Add language options
-  languages.forEach(lang => {
-    const option = document.createElement('option');
-    option.value = lang.code;
-    option.textContent = lang.name;
-    option.selected = lang.code === currentLanguage;
-    dropdown.appendChild(option);
-  });
-  
-  // Add event listener for language change
-  dropdown.addEventListener('change', (e) => {
-    switchLanguage(e.target.value);
-  });
-  
-  // Add label and dropdown to container
-  const label = document.createElement('span');
-  label.className = 'lang-icon';
-  label.innerHTML = '<i class="fas fa-globe"></i>';
-  
-  langSelector.appendChild(label);
-  langSelector.appendChild(dropdown);
-  
-  // Insert before mobile nav toggle
-  const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
-  
-  if (mobileNavToggle) {
-    header.insertBefore(langSelector, mobileNavToggle);
-  } else {
-    // Fallback if mobile nav toggle not found
-    header.appendChild(langSelector);
+  // Only show toggle if not already in English
+  if (currentLanguage !== 'en') {
+    const toggleLink = document.createElement('a');
+    toggleLink.href = '#';
+    toggleLink.textContent = 'English';
+    toggleLink.style.marginLeft = '15px';
+    toggleLink.style.fontSize = '12px';
+    toggleLink.style.color = 'rgba(255,255,255,0.5)';
+    
+    toggleLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchLanguage('en');
+      toggleLink.style.display = 'none';
+    });
+    
+    const copyright = footerBottom.querySelector('p');
+    if (copyright) {
+      copyright.appendChild(document.createTextNode(' '));
+      copyright.appendChild(toggleLink);
+    } else {
+      footerBottom.appendChild(toggleLink);
+    }
+    
+    console.log('Added English toggle to footer');
   }
-  
-  console.log('Language selector created');
 }
 
 // Load translation file for specified language
@@ -161,13 +163,6 @@ async function switchLanguage(langCode) {
     localStorage.setItem('preferred-language', langCode);
     currentLanguage = langCode;
     
-    // Show loading indicator
-    const dropdown = document.getElementById('language-dropdown');
-    if (dropdown) {
-      dropdown.classList.add('loading');
-      dropdown.disabled = true;
-    }
-    
     // Load new translations
     const success = await loadTranslation(langCode);
     
@@ -184,25 +179,14 @@ async function switchLanguage(langCode) {
       }
       
       console.log(`Successfully switched to ${langCode}`);
+      
+      // Reload page to ensure proper application of translations
+      window.location.reload();
     } else {
       console.error(`Failed to switch to ${langCode}`);
     }
-    
-    // Remove loading indicator
-    if (dropdown) {
-      dropdown.classList.remove('loading');
-      dropdown.disabled = false;
-    }
   } catch (error) {
     console.error('Error switching language:', error);
-    
-    // Reset dropdown value
-    const dropdown = document.getElementById('language-dropdown');
-    if (dropdown) {
-      dropdown.value = currentLanguage;
-      dropdown.classList.remove('loading');
-      dropdown.disabled = false;
-    }
   }
 }
 
@@ -260,12 +244,6 @@ function translatePage() {
   }
 }
 
-// The showcase banner has been removed, so we don't need this function anymore
-// Keeping a simplified version that does nothing for backward compatibility
-function updateShowcaseNotice() {
-  // Showcase banner has been removed, nothing to update
-}
-
 // Utility function to get a translation by key
 function getTranslation(key, fallback = '') {
   if (translations[key]) {
@@ -288,4 +266,4 @@ window.translateSystem = {
   getCurrentLanguage: () => currentLanguage,
   translate: getTranslation,
   refreshTranslations: translatePage
-}; 
+};
