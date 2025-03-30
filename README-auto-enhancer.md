@@ -9,6 +9,17 @@ This tool automatically enhances the B.BharatKumar jewelry shop website over tim
 - **Smart Selection**: Uses weighted randomization to select files and enhancement types
 - **Change Tracking**: Logs all enhancements for review
 - **Automatic Git Integration**: Commits and pushes changes to GitHub
+- **Business Requirement Compliance**: Ensures all changes comply with showcase-only requirements
+
+## Business Requirements
+
+The tool enforces the following business requirements:
+
+1. **Showcase Only**: The website clearly states it is for displaying jewels only, not for selling
+2. **No Prices**: All mentions of prices, discounts, sales, or offers are removed
+3. **Business Focus**: Content emphasizes that the primary business is 92.5 silver, with a small portion of gold
+4. **No Buy Options**: All "Buy" or "Order" buttons are disabled or removed
+5. **No Misleading Information**: Ensures no misleading claims about selling products appear
 
 ## Enhancement Types
 
@@ -19,6 +30,7 @@ The tool can make the following types of improvements:
 3. **Optimize Performance**: Code optimizations for better loading and rendering
 4. **Enhance Visual Appeal**: Small visual improvements
 5. **Add Accessibility Features**: Make the site more accessible to all users
+6. **Ensure Showcase-only Compliance**: Verify and enforce business requirements
 
 ## Setup
 
@@ -51,6 +63,22 @@ Once running, you can use these commands:
 - `log` - View enhancement history
 - `exit` - Exit the program
 
+## Running 24/7 (Even When Mac is Closed)
+
+For continuous operation, use the keep-alive script on a cloud server:
+
+1. Set up a Virtual Private Server (VPS) like DigitalOcean, AWS EC2, or Azure VM
+2. Clone your repository to the server
+3. Run the keep-alive script:
+   ```
+   node keep-alive.js
+   ```
+
+The keep-alive script:
+- Keeps the auto-enhancer running
+- Forces GitHub Pages to rebuild periodically
+- Continues working even when your computer is off
+
 ## Configuration
 
 You can adjust settings in the `CONFIG` object at the top of `auto-enhance.js`:
@@ -59,6 +87,7 @@ You can adjust settings in the `CONFIG` object at the top of `auto-enhance.js`:
 - `maxChangesPerRun`: Maximum number of changes per run (default: 1)
 - `targetFiles`: Which files to enhance and their selection weight
 - `improvementTypes`: Types of improvements and their selection weight
+- `businessRequirements`: Compliance requirements for showcase-only website
 
 ## How It Works
 

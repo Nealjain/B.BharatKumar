@@ -31,9 +31,19 @@ const CONFIG = {
         { name: 'Improve mobile responsiveness', weight: 3 },
         { name: 'Optimize performance', weight: 2 },
         { name: 'Enhance visual appeal', weight: 3 },
-        { name: 'Add accessibility features', weight: 2 }
+        { name: 'Add accessibility features', weight: 2 },
+        { name: 'Ensure showcase-only compliance', weight: 4 } // Higher weight for compliance
     ],
-    enhancementLog: 'enhancement-log.json'
+    enhancementLog: 'enhancement-log.json',
+    // Business requirements
+    businessRequirements: {
+        showcaseOnly: true,          // Only for displaying, not selling
+        noPrices: true,              // No mention of prices or discounts
+        primaryFocus: "92.5 silver", // Primary business focus
+        secondaryFocus: "gold",      // Secondary business focus
+        noBuyOptions: true,          // No buy or order buttons
+        noMisleadingInfo: true       // No misleading claims about sales
+    }
 };
 
 // Utility to execute shell commands
@@ -142,11 +152,413 @@ function generateEnhancement(filePath, improvementType) {
     return enhancement;
 }
 
+// Add new function for ensuring showcase-only compliance
+function ensureComplianceWithBusinessRequirements(fileContent, fileExtension) {
+    const changes = [];
+    
+    if (fileExtension === '.html') {
+        // Check for buy/order buttons and replace them
+        if (CONFIG.businessRequirements.noBuyOptions) {
+            // Replace buy/order/purchase buttons with "View Details" or disable them
+            if (fileContent.match(/buy|order|purchase|shop now|add to cart/i)) {
+                changes.push({
+                    type: 'replace',
+                    search: /<button[^>]*>(.*?buy.*?)<\/button>/gi,
+                    replacement: '<button class="view-btn" disabled>View Details</button>'
+                });
+                
+                changes.push({
+                    type: 'replace',
+                    search: /<button[^>]*>(.*?order.*?)<\/button>/gi,
+                    replacement: '<button class="view-btn" disabled>View Details</button>'
+                });
+                
+                changes.push({
+                    type: 'replace',
+                    search: /<button[^>]*>(.*?purchase.*?)<\/button>/gi,
+                    replacement: '<button class="view-btn" disabled>View Details</button>'
+                });
+                
+                changes.push({
+                    type: 'replace',
+                    search: /<button[^>]*>(.*?shop now.*?)<\/button>/gi,
+                    replacement: '<button class="view-btn" disabled>View Collection</button>'
+                });
+                
+                changes.push({
+                    type: 'replace',
+                    search: /<button[^>]*>(.*?add to cart.*?)<\/button>/gi,
+                    replacement: '<button class="view-btn" disabled>View Details</button>'
+                });
+                
+                // Replace links with similar text
+                changes.push({
+                    type: 'replace',
+                    search: /<a[^>]*>(.*?buy.*?)<\/a>/gi,
+                    replacement: '<a href="javascript:void(0)" class="view-link">View Details</a>'
+                });
+                
+                changes.push({
+                    type: 'replace',
+                    search: /<a[^>]*>(.*?order.*?)<\/a>/gi,
+                    replacement: '<a href="javascript:void(0)" class="view-link">View Details</a>'
+                });
+            }
+        }
+        
+        // Add showcase-only notice if not present
+        if (CONFIG.businessRequirements.showcaseOnly) {
+            if (!fileContent.includes('showcase only') && !fileContent.includes('display only')) {
+                const heroSection = fileContent.match(/<section[^>]*hero[^>]*>([\s\S]*?)<\/section>/i);
+                if (heroSection) {
+                    changes.push({
+                        type: 'replace',
+                        search: heroSection[0],
+                        replacement: heroSection[0].replace(
+                            /<\/h1>/i, 
+                            '</h1>\n      <p class="showcase-notice">Showcase Only - Not For Sale</p>'
+                        )
+                    });
+                }
+                
+                // Add disclaimer in footer if not present
+                const footerSection = fileContent.match(/<footer[^>]*>([\s\S]*?)<\/footer>/i);
+                if (footerSection && !footerSection[0].includes('showcase')) {
+                    changes.push({
+                        type: 'replace',
+                        search: footerSection[0],
+                        replacement: footerSection[0].replace(
+                            /<\/footer>/i,
+                            '  <div class="disclaimer">\n    <p>This website is for showcase purposes only. Products displayed are not for sale.</p>\n  </div>\n</footer>'
+                        )
+                    });
+                }
+            }
+        }
+        
+        // Ensure primary business focus is mentioned
+        if (!fileContent.includes(CONFIG.businessRequirements.primaryFocus)) {
+            const aboutSection = fileContent.match(/<section[^>]*about[^>]*>([\s\S]*?)<\/section>/i);
+            if (aboutSection) {
+                changes.push({
+                    type: 'replace',
+                    search: aboutSection[0],
+                    replacement: aboutSection[0].replace(
+                        /<\/p>/i,
+                        ` Our primary focus is ${CONFIG.businessRequirements.primaryFocus} jewelry, with a small selection of ${CONFIG.businessRequirements.secondaryFocus} pieces also on display.</p>`
+                    )
+                });
+            }
+        }
+        
+        // Remove price mentions
+        if (CONFIG.businessRequirements.noPrices) {
+            changes.push({
+                type: 'replace',
+                search: /\$\d+(\.\d{2})?/g,
+                replacement: ''
+            });
+            
+            changes.push({
+                type: 'replace',
+                search: /Rs\.\s*\d+/g,
+                replacement: ''
+            });
+            
+            changes.push({
+                type: 'replace',
+                search: /₹\s*\d+/g,
+                replacement: ''
+            });
+            
+            changes.push({
+                type: 'replace',
+                search: /(price|cost):\s*[\w\s\.₹$,]+/gi,
+                replacement: ''
+            });
+            
+            changes.push({
+                type: 'replace',
+                search: /(discount|sale|offer|special price)/gi,
+                replacement: 'exclusive design'
+            });
+        }
+    } 
+    else if (fileExtension === '.css') {
+        // Add CSS for showcase notice
+        if (CONFIG.businessRequirements.showcaseOnly && !fileContent.includes('.showcase-notice')) {
+            changes.push({
+                type: 'add',
+                position: fileContent.lastIndexOf('}') + 1,
+                content: `\n\n/* Auto-enhanced: Added showcase notice styling */
+.showcase-notice {
+    background-color: var(--gold);
+    color: white;
+    padding: 8px 16px;
+    display: inline-block;
+    margin-top: 15px;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.disclaimer {
+    background-color: #f8f8f8;
+    padding: 15px;
+    text-align: center;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.disclaimer p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+}\n`
+            });
+        }
+        
+        // Style disabled buttons
+        if (CONFIG.businessRequirements.noBuyOptions && !fileContent.includes('.view-btn')) {
+            changes.push({
+                type: 'add',
+                position: fileContent.lastIndexOf('}') + 1,
+                content: `\n\n/* Auto-enhanced: Added view-only button styling */
+.view-btn {
+    background-color: #f0f0f0;
+    color: var(--dark);
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    cursor: default;
+    transition: background-color 0.3s;
+}
+
+.view-btn:hover {
+    background-color: #e8e8e8;
+}
+
+.view-link {
+    color: var(--dark);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--gold);
+}
+
+.view-link:hover {
+    color: var(--gold);
+}\n`
+            });
+        }
+    }
+    else if (fileExtension === '.js') {
+        // Disable e-commerce related functionality
+        if (CONFIG.businessRequirements.noBuyOptions) {
+            if (fileContent.includes('add to cart') || fileContent.includes('buy') || fileContent.includes('purchase')) {
+                changes.push({
+                    type: 'add',
+                    position: fileContent.lastIndexOf('});') + 3,
+                    content: `\n\n// Auto-enhanced: Added showcase-only compliance
+document.addEventListener('DOMContentLoaded', function() {
+    // Disable any remaining buy/order/purchase buttons
+    const buyButtons = document.querySelectorAll('button, a');
+    buyButtons.forEach(button => {
+        const buttonText = button.textContent.toLowerCase();
+        if (buttonText.includes('buy') || 
+            buttonText.includes('order') || 
+            buttonText.includes('purchase') || 
+            buttonText.includes('add to cart') ||
+            buttonText.includes('shop now')) {
+            
+            // Replace with view button
+            if (button.tagName === 'BUTTON') {
+                button.textContent = 'View Details';
+                button.disabled = true;
+                button.classList.add('view-btn');
+            } else if (button.tagName === 'A') {
+                button.textContent = 'View Details';
+                button.setAttribute('href', 'javascript:void(0)');
+                button.classList.add('view-link');
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            }
+        }
+    });
+    
+    // Add alert for any remaining purchase attempts
+    document.body.addEventListener('click', function(e) {
+        const target = e.target;
+        if (target.tagName === 'BUTTON' || target.tagName === 'A') {
+            const text = target.textContent.toLowerCase();
+            if (text.includes('buy') || 
+                text.includes('order') || 
+                text.includes('purchase') || 
+                text.includes('add to cart') ||
+                text.includes('shop now')) {
+                
+                e.preventDefault();
+                e.stopPropagation();
+                alert('This website is for showcase purposes only. Products are not for sale.');
+                return false;
+            }
+        }
+    });
+});\n`
+                });
+            }
+        }
+    }
+    
+    return changes;
+}
+
+// Generate HTML enhancement
+function generateHtmlEnhancement(fileContent, improvementType, enhancement) {
+    console.log(`Generating HTML enhancement: ${improvementType}`);
+    
+    // For business requirement compliance, use a dedicated function
+    if (improvementType === 'Ensure showcase-only compliance') {
+        const complianceChanges = ensureComplianceWithBusinessRequirements(fileContent, '.html');
+        enhancement.changes = enhancement.changes.concat(complianceChanges);
+        return enhancement;
+    }
+    
+    // Existing code for other enhancement types
+    switch (improvementType) {
+        case 'Add accessibility features':
+            if (!fileContent.includes('aria-label')) {
+                // Add aria-labels to social media links
+                let socialIconsMatch = fileContent.match(/<div class="social-icons">([\s\S]*?)<\/div>/);
+                if (socialIconsMatch) {
+                    let socialIconsContent = socialIconsMatch[1];
+                    let enhancedContent = socialIconsContent
+                        .replace(/<a href="#"><i class="fab fa-facebook-f"><\/i><\/a>/, '<a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>')
+                        .replace(/<a href="#"><i class="fab fa-instagram"><\/i><\/a>/, '<a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>')
+                        .replace(/<a href="#"><i class="fab fa-twitter"><\/i><\/a>/, '<a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>')
+                        .replace(/<a href="#"><i class="fab fa-whatsapp"><\/i><\/a>/, '<a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>');
+                        
+                    enhancement.changes.push({
+                        type: 'replace',
+                        search: socialIconsContent,
+                        replacement: enhancedContent
+                    });
+                }
+            }
+            break;
+            
+        case 'Optimize performance':
+            // Add loading attributes to images
+            if (!fileContent.includes('loading="lazy"')) {
+                enhancement.changes.push({
+                    type: 'replace',
+                    search: /<img src="([^"]+)" alt="([^"]+)"/g,
+                    replacement: '<img src="$1" alt="$2" loading="lazy"'
+                });
+            }
+            break;
+            
+        case 'Enhance visual appeal':
+            // Add subtle icon to headings
+            if (!fileContent.includes('section-title-icon')) {
+                const sectionHeaders = fileContent.match(/<h2>([^<]+)<\/h2>/g);
+                if (sectionHeaders && sectionHeaders.length > 0) {
+                    // Enhance the first section header found
+                    enhancement.changes.push({
+                        type: 'replace',
+                        search: sectionHeaders[0],
+                        replacement: sectionHeaders[0].replace(/<h2>([^<]+)<\/h2>/, '<h2><span class="section-title-icon">✦</span> $1</h2>')
+                    });
+                    
+                    // Add CSS for the icon in a style tag
+                    if (!fileContent.includes('<style>')) {
+                        enhancement.changes.push({
+                            type: 'add',
+                            position: fileContent.indexOf('</head>'),
+                            content: `
+    <!-- Auto-enhanced: Added subtle section title icon styling -->
+    <style>
+        .section-title-icon {
+            display: inline-block;
+            color: var(--gold);
+            margin-right: 8px;
+            transform: scale(0.8);
+        }
+    </style>`
+                        });
+                    }
+                }
+            }
+            break;
+            
+        case 'Improve mobile responsiveness':
+            // Ensure proper viewport meta tag
+            if (!fileContent.includes('viewport')) {
+                enhancement.changes.push({
+                    type: 'add',
+                    position: fileContent.indexOf('</head>'),
+                    content: '\n    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">'
+                });
+            } else if (!fileContent.includes('maximum-scale')) {
+                enhancement.changes.push({
+                    type: 'replace',
+                    search: /<meta name="viewport" content="[^"]+"/,
+                    replacement: '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"'
+                });
+            }
+            break;
+            
+        case 'Add subtle animations':
+            // Add subtle animation class to section headers
+            if (!fileContent.includes('data-aos')) {
+                enhancement.changes.push({
+                    type: 'replace',
+                    search: /<div class="section-header">/g,
+                    replacement: '<div class="section-header" data-aos="fade-up" data-aos-duration="800">'
+                });
+                
+                // Add AOS library if not present
+                if (!fileContent.includes('aos.js')) {
+                    enhancement.changes.push({
+                        type: 'add',
+                        position: fileContent.indexOf('</head>'),
+                        content: `
+    <!-- Auto-enhanced: Added AOS library for subtle scroll animations -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />`
+                    });
+                    
+                    enhancement.changes.push({
+                        type: 'add',
+                        position: fileContent.indexOf('</body>'),
+                        content: `
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init();
+        });
+    </script>`
+                    });
+                }
+            }
+            break;
+    }
+    
+    // Apply business requirements regardless of enhancement type
+    const complianceChanges = ensureComplianceWithBusinessRequirements(fileContent, '.html');
+    enhancement.changes = enhancement.changes.concat(complianceChanges);
+    
+    return enhancement;
+}
+
 // Generate CSS enhancement
 function generateCssEnhancement(fileContent, improvementType, enhancement) {
     console.log(`Generating CSS enhancement: ${improvementType}`);
     
-    // Look for opportunities to enhance based on improvement type
+    // For business requirement compliance, use a dedicated function
+    if (improvementType === 'Ensure showcase-only compliance') {
+        const complianceChanges = ensureComplianceWithBusinessRequirements(fileContent, '.css');
+        enhancement.changes = enhancement.changes.concat(complianceChanges);
+        return enhancement;
+    }
+    
+    // Existing enhancement logic
     switch (improvementType) {
         case 'Add subtle animations':
             if (!fileContent.includes('@keyframes hover-glow')) {
@@ -233,6 +645,10 @@ a:focus, button:focus {
             break;
     }
     
+    // Apply business requirements regardless of enhancement type
+    const complianceChanges = ensureComplianceWithBusinessRequirements(fileContent, '.css');
+    enhancement.changes = enhancement.changes.concat(complianceChanges);
+    
     return enhancement;
 }
 
@@ -240,6 +656,14 @@ a:focus, button:focus {
 function generateJsEnhancement(fileContent, improvementType, enhancement) {
     console.log(`Generating JS enhancement: ${improvementType}`);
     
+    // For business requirement compliance, use a dedicated function
+    if (improvementType === 'Ensure showcase-only compliance') {
+        const complianceChanges = ensureComplianceWithBusinessRequirements(fileContent, '.js');
+        enhancement.changes = enhancement.changes.concat(complianceChanges);
+        return enhancement;
+    }
+    
+    // Existing enhancement logic
     switch (improvementType) {
         case 'Add subtle animations':
             if (!fileContent.includes('scrollOffset')) {
@@ -397,130 +821,9 @@ document.addEventListener('DOMContentLoaded', function() {
             break;
     }
     
-    return enhancement;
-}
-
-// Generate HTML enhancement
-function generateHtmlEnhancement(fileContent, improvementType, enhancement) {
-    console.log(`Generating HTML enhancement: ${improvementType}`);
-    
-    switch (improvementType) {
-        case 'Add accessibility features':
-            if (!fileContent.includes('aria-label')) {
-                // Add aria-labels to social media links
-                let socialIconsMatch = fileContent.match(/<div class="social-icons">([\s\S]*?)<\/div>/);
-                if (socialIconsMatch) {
-                    let socialIconsContent = socialIconsMatch[1];
-                    let enhancedContent = socialIconsContent
-                        .replace(/<a href="#"><i class="fab fa-facebook-f"><\/i><\/a>/, '<a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>')
-                        .replace(/<a href="#"><i class="fab fa-instagram"><\/i><\/a>/, '<a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>')
-                        .replace(/<a href="#"><i class="fab fa-twitter"><\/i><\/a>/, '<a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>')
-                        .replace(/<a href="#"><i class="fab fa-whatsapp"><\/i><\/a>/, '<a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>');
-                        
-                    enhancement.changes.push({
-                        type: 'replace',
-                        search: socialIconsContent,
-                        replacement: enhancedContent
-                    });
-                }
-            }
-            break;
-            
-        case 'Optimize performance':
-            // Add loading attributes to images
-            if (!fileContent.includes('loading="lazy"')) {
-                enhancement.changes.push({
-                    type: 'replace',
-                    search: /<img src="([^"]+)" alt="([^"]+)"/g,
-                    replacement: '<img src="$1" alt="$2" loading="lazy"'
-                });
-            }
-            break;
-            
-        case 'Enhance visual appeal':
-            // Add subtle icon to headings
-            if (!fileContent.includes('section-title-icon')) {
-                const sectionHeaders = fileContent.match(/<h2>([^<]+)<\/h2>/g);
-                if (sectionHeaders && sectionHeaders.length > 0) {
-                    // Enhance the first section header found
-                    enhancement.changes.push({
-                        type: 'replace',
-                        search: sectionHeaders[0],
-                        replacement: sectionHeaders[0].replace(/<h2>([^<]+)<\/h2>/, '<h2><span class="section-title-icon">✦</span> $1</h2>')
-                    });
-                    
-                    // Add CSS for the icon in a style tag
-                    if (!fileContent.includes('<style>')) {
-                        enhancement.changes.push({
-                            type: 'add',
-                            position: fileContent.indexOf('</head>'),
-                            content: `
-    <!-- Auto-enhanced: Added subtle section title icon styling -->
-    <style>
-        .section-title-icon {
-            display: inline-block;
-            color: var(--gold);
-            margin-right: 8px;
-            transform: scale(0.8);
-        }
-    </style>`
-                        });
-                    }
-                }
-            }
-            break;
-            
-        case 'Improve mobile responsiveness':
-            // Ensure proper viewport meta tag
-            if (!fileContent.includes('viewport')) {
-                enhancement.changes.push({
-                    type: 'add',
-                    position: fileContent.indexOf('</head>'),
-                    content: '\n    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">'
-                });
-            } else if (!fileContent.includes('maximum-scale')) {
-                enhancement.changes.push({
-                    type: 'replace',
-                    search: /<meta name="viewport" content="[^"]+"/,
-                    replacement: '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"'
-                });
-            }
-            break;
-            
-        case 'Add subtle animations':
-            // Add subtle animation class to section headers
-            if (!fileContent.includes('data-aos')) {
-                enhancement.changes.push({
-                    type: 'replace',
-                    search: /<div class="section-header">/g,
-                    replacement: '<div class="section-header" data-aos="fade-up" data-aos-duration="800">'
-                });
-                
-                // Add AOS library if not present
-                if (!fileContent.includes('aos.js')) {
-                    enhancement.changes.push({
-                        type: 'add',
-                        position: fileContent.indexOf('</head>'),
-                        content: `
-    <!-- Auto-enhanced: Added AOS library for subtle scroll animations -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />`
-                    });
-                    
-                    enhancement.changes.push({
-                        type: 'add',
-                        position: fileContent.indexOf('</body>'),
-                        content: `
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            AOS.init();
-        });
-    </script>`
-                    });
-                }
-            }
-            break;
-    }
+    // Apply business requirements regardless of enhancement type
+    const complianceChanges = ensureComplianceWithBusinessRequirements(fileContent, '.js');
+    enhancement.changes = enhancement.changes.concat(complianceChanges);
     
     return enhancement;
 }
