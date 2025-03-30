@@ -7,7 +7,9 @@ This is the official website for B.BharatKumar Jewelry Shop, featuring our elega
 - Elegant and responsive design
 - Showcase of our jewelry collection
 - Auto-scrolling gallery display
+- Multi-language support (English, Hindi, Marathi, Gujarati)
 - Contact information and location
+- AI-powered auto-enhancement system
 
 ## Technologies Used
 
@@ -17,14 +19,36 @@ This is the official website for B.BharatKumar Jewelry Shop, featuring our elega
 - Font Awesome icons
 - Google Fonts
 - Google Maps integration
+- AI-driven enhancements
+
+## AI Auto-Enhancement System
+
+The website includes an automated enhancement system that gradually improves the website over time:
+
+- **Automatic improvements**: The system analyzes the codebase and applies small, beneficial changes
+- **Progressive enhancements**: Focus on accessibility, animations, performance, and mobile responsiveness
+- **Scheduled updates**: Changes are applied on a scheduled basis to maintain freshness
+- **Change tracking**: All enhancements are logged for transparency
+
+To run the auto-enhancement system manually:
+```
+# If Node.js is installed
+node auto-enhance.js run
+
+# To view enhancement history
+node auto-enhance.js log
+
+# To start scheduled enhancements
+node auto-enhance.js start
+```
 
 ## Deployment
 
-The website is hosted on GitHub Pages and can be accessed at [YOUR_USERNAME.github.io/B.BharatKumar](https://YOUR_USERNAME.github.io/B.BharatKumar).
+The website is hosted on GitHub Pages and can be accessed at [nealjain.github.io/B.BharatKumar](https://nealjain.github.io/B.BharatKumar).
 
 ### Deploying Changes
 
-To deploy changes to the website, you have several options:
+To deploy changes to the website:
 
 1. **Regular Git Workflow**:
    ```
@@ -35,18 +59,8 @@ To deploy changes to the website, you have several options:
 
 2. **Using the Auto-Enhancer Tool**:
    ```
-   # If Node.js is not installed, install it first from nodejs.org
-   
-   # Run the auto-enhancer
-   node auto-enhance.js
-   
-   # Select 'direct' command when prompted to immediately deploy changes
+   node auto-enhance.js run
    ```
-
-3. **Manual Direct Deployment**:
-   - Make your changes to the website files
-   - Create or edit `.nojekyll` file in the root directory to disable Jekyll processing
-   - Push changes to the `gh-pages` branch or the branch configured for GitHub Pages
 
 After deployment, changes should be visible on your GitHub Pages site within 1-2 minutes.
 
@@ -55,14 +69,24 @@ After deployment, changes should be visible on your GitHub Pages site within 1-2
 This is a single-page website showcasing the products and services offered by B.BharatKumar jewelry shop. The website includes sections for:
 
 - About the shop
-- Jewelry collection
+- Jewelry collection with auto-scrolling gallery
 - Store location with Google Maps integration
 - Contact information
+
+## Languages Supported
+
+The website is available in multiple languages:
+- English
+- Hindi (हिन्दी)
+- Marathi (मराठी)
+- Gujarati (ગુજરાતી)
+
+Users can easily switch between languages using the language selector in the header.
 
 ## How to View the Website
 
 1. Open the `index.html` file in any modern web browser.
-2. Alternatively, you can deploy this website to any web hosting service.
+2. Alternatively, visit the hosted version at [nealjain.github.io/B.BharatKumar](https://nealjain.github.io/B.BharatKumar).
 
 ## Customization
 
@@ -74,4 +98,4 @@ To customize this website:
 
 ## License
 
-This project is free to use for B.BharatKumar jewelry shop. 
+This project is proprietary to B.BharatKumar jewelry shop. 
