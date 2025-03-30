@@ -227,8 +227,20 @@ img, video {
         font-size: 0.8rem;
     }
     
-    .hero-content h1 {
-        font-size: 2rem;
+    .hero {
+        height: 70vh;
+        background-attachment: scroll;
+        margin-top: 60px;
+    }
+    
+    .hero h1 {
+        font-size: 2.5rem !important;
+        letter-spacing: 1.5px;
+        margin-bottom: 15px;
+    }
+    
+    .hero p {
+        font-size: 1.2rem !important;
     }
 }
 
@@ -241,6 +253,21 @@ img, video {
         font-size: 0.9rem;
         letter-spacing: 0.3px;
     }
+    
+    .hero {
+        height: 60vh;
+        background-position: center center;
+    }
+    
+    .hero h1 {
+        font-size: 2rem !important;
+        letter-spacing: 1.2px;
+        margin-bottom: 12px;
+    }
+    
+    .hero p {
+        font-size: 1rem !important;
+    }
 }
 
 /* ========== Hero Section ========== */
@@ -249,7 +276,7 @@ img, video {
     background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../images/banner-bg.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    background-attachment: scroll;
     position: relative;
     display: flex;
     align-items: center;
@@ -841,11 +868,13 @@ footer {
     }
     
     .hero h1 {
-        font-size: 2rem;
+        font-size: 2.5rem !important;
+        letter-spacing: 1.5px;
+        margin-bottom: 15px;
     }
     
     .hero p {
-        font-size: 1.1rem;
+        font-size: 1.2rem !important;
     }
     
     .section-header h2 {
@@ -870,7 +899,9 @@ footer {
     }
     
     .hero-content h1 {
-        font-size: 2rem;
+        font-size: 2.5rem !important;
+        letter-spacing: 1.5px;
+        margin-bottom: 15px;
     }
     
     .gallery-item:hover img {
@@ -901,12 +932,13 @@ footer {
     }
     
     .hero h1 {
-        font-size: 2.2rem;
-        letter-spacing: 1.5px;
+        font-size: 2rem !important;
+        letter-spacing: 1.2px;
+        margin-bottom: 12px;
     }
     
     .hero p {
-        font-size: 1rem;
+        font-size: 1rem !important;
     }
     
     .brand-text {
@@ -1078,18 +1110,24 @@ footer {
 
 @media (max-width: 768px) {
     .video-wallpaper {
-        height: 60vh; /* Smaller on mobile */
+        height: 50vh;
+    }
+    
+    .video-container video {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
     }
     
     .brand-text {
-        font-size: 2.5rem;
-        letter-spacing: 1.5px;
-        margin-bottom: 0.3rem;
+        font-size: 2rem !important;
+        letter-spacing: 1.2px;
+        margin-bottom: 0.2rem;
     }
 
     .brand-tagline {
-        font-size: 1.2rem;
-        letter-spacing: 1px;
+        font-size: 1rem !important;
+        letter-spacing: 0.8px;
     }
 }
 

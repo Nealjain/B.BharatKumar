@@ -1,12 +1,14 @@
 /**
  * B.BharatKumar Website Translation System
- * Simple translation between English and Hindi
+ * Multi-language support for English, Hindi, Marathi, and Gujarati
  */
 
-// Available languages configuration - simplify to just English and Hindi
+// Available languages configuration - support for major Indian languages
 const languages = [
   { code: 'en', name: 'English' },
-  { code: 'hi', name: 'हिन्दी' }
+  { code: 'hi', name: 'हिन्दी' },
+  { code: 'mr', name: 'मराठी' },
+  { code: 'gu', name: 'ગુજરાતી' }
 ];
 
 // Translation data - will be loaded from JSON files
@@ -113,7 +115,7 @@ async function loadTranslation(langCode) {
     console.log(`Loading translations for ${langCode}...`);
     
     // Force fallback to English if not supported
-    if (langCode !== 'en' && langCode !== 'hi') {
+    if (!languages.some(lang => lang.code === langCode)) {
       console.warn(`Language ${langCode} not supported, falling back to English`);
       langCode = 'en';
       currentLanguage = 'en';
@@ -278,5 +280,6 @@ document.addEventListener('DOMContentLoaded', initTranslation);
 window.translateSystem = {
   switchLanguage,
   getCurrentLanguage: () => currentLanguage,
-  translate: (key) => translations[key] || key
+  translate: (key) => translations[key] || key,
+  refreshTranslations: translatePage
 };
