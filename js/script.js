@@ -421,4 +421,117 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Prevent right-clicking and text selection
 document.addEventListener('contextmenu', event => event.preventDefault());
-document.addEventListener('selectstart', event => event.preventDefault()); 
+document.addEventListener('selectstart', event => event.preventDefault());
+
+// Add letter-by-letter animation
+function animateLetters() {
+    const elements = document.querySelectorAll('.brand-text, .brand-tagline');
+    
+    elements.forEach(element => {
+        const text = element.textContent;
+        let html = '';
+        
+        // Split text into letters
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === ' ') {
+                html += ' ';
+            } else {
+                const delay = i * 0.05; // 50ms delay between each letter
+                html += `<span class="letter" style="animation-delay: ${delay}s">${text[i]}</span>`;
+            }
+        }
+        
+        element.innerHTML = html;
+        element.classList.add('animate-letters');
+    });
+}
+
+// Parallax scrolling effect
+function initParallaxEffect() {
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        
+        // Parallax for hero section
+        const heroSection = document.querySelector('.hero');
+        if (heroSection) {
+            heroSection.style.backgroundPositionY = `${scrolled * 0.5}px`;
+        }
+        
+        // Subtle parallax for collection items
+        const collectionItems = document.querySelectorAll('.gallery-item img');
+        collectionItems.forEach(item => {
+            const parent = item.closest('.gallery-item');
+            const rect = parent.getBoundingClientRect();
+            if (rect) {
+                const centerY = rect.top + rect.height / 2;
+                const viewportCenter = window.innerHeight / 2;
+                const distanceFromCenter = (centerY - viewportCenter) * 0.05;
+                
+                item.style.transform = `translateY(${distanceFromCenter}px) scale(1.1)`;
+            }
+        });
+    });
+}
+
+// 3D hover effect for gallery items
+function init3DHoverEffect() {
+    const items = document.querySelectorAll('.gallery-item');
+    
+    items.forEach(item => {
+        item.addEventListener('mousemove', handleHover3D);
+        item.addEventListener('mouseleave', resetHover3D);
+    });
+}
+
+function handleHover3D(e) {
+    const item = this;
+    const rect = item.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const angleX = (y - centerY) / 20;
+    const angleY = (centerX - x) / 20;
+    
+    item.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale3d(1.05, 1.05, 1.05)`;
+    item.style.transition = 'transform 0.1s ease';
+    
+    // Add shadow based on tilt
+    const shadow = `0 ${Math.abs(angleX) * 2}px ${Math.abs(angleY) * 2}px rgba(0,0,0,0.2)`;
+    item.style.boxShadow = shadow;
+}
+
+function resetHover3D() {
+    this.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    this.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
+    this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+}
+
+// Initialize these features when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Call function when video section is in view
+    const videoSection = document.getElementById('video-wallpaper');
+    const brandOverlay = document.querySelector('.brand-overlay');
+
+    if (videoSection && brandOverlay) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        brandOverlay.classList.add('visible');
+                        animateLetters();
+                    }, 500);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        observer.observe(videoSection);
+    }
+    
+    // Initialize futuristic features
+    initParallaxEffect();
+    init3DHoverEffect();
+}); 

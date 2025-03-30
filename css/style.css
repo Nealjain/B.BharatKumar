@@ -10,6 +10,26 @@
     --white: #fff;
     --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
+    /* Brand Identity Colors */
+    --brand-gold: #D4AF37;
+    --brand-gold-rgb: 212, 175, 55;
+    --brand-dark: #121212;
+    --brand-dark-rgb: 18, 18, 18;
+    --brand-accent: #8A6D3B;
+    --brand-light: #F8F4E3;
+    --brand-near-black: #0A0A0A;
+    --font-primary: 'Cormorant Garamond', serif;
+    --font-secondary: 'Montserrat', sans-serif;
+    --font-accent: 'Cinzel', serif;
+    
+    --gold-color: var(--brand-gold);
+    --gold-color-rgb: var(--brand-gold-rgb);
+    --dark-color: var(--brand-dark);
+    --dark-color-rgb: var(--brand-dark-rgb);
+    --light-color: var(--brand-light);
+    --gray-color: #888;
+    --light-gray-color: #f5f5f5;
+    --white-color: #fff;
 }
 
 /* Hide scrollbar but keep functionality */
@@ -18,6 +38,7 @@ html {
     -ms-overflow-style: none; /* IE and Edge */
     margin: 0;
     padding: 0;
+    scroll-behavior: smooth;
 }
 
 html::-webkit-scrollbar {
@@ -375,6 +396,28 @@ img, video {
     flex-shrink: 0;
     pointer-events: none;
     user-select: none;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    overflow: visible;
+}
+
+.gallery-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(var(--brand-gold-rgb), 0.2) 0%, rgba(var(--brand-dark-rgb), 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    border-radius: 10px;
+}
+
+.gallery-item:hover::before {
+    opacity: 1;
 }
 
 .gallery-item img {
@@ -397,8 +440,9 @@ img, video {
     padding: 15px;
     background: rgba(0, 0, 0, 0.7);
     color: var(--white);
-    transform: translateY(100%);
+    transform: translateZ(30px);
     transition: transform 0.3s ease;
+    backface-visibility: hidden;
 }
 
 .gallery-item:hover .gallery-caption {
@@ -1016,36 +1060,30 @@ footer {
 
 /* Text slot machine effect */
 .brand-text {
-    font-family: 'Cinzel', serif;
-    font-size: 5rem;
-    font-weight: 700;
-    color: var(--gold);
-    text-align: center;
-    line-height: 1.2;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
-    transform: scale(0.9);
-    transition: transform 0.5s ease;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    margin-bottom: 0.5rem;
+    font-family: var(--font-accent, 'Cinzel', serif);
+    color: var(--brand-gold, #D4AF37);
+    font-size: 3.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
 }
 
 .brand-tagline {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 400;
-    color: var(--gold);
-    text-align: center;
+    font-family: var(--font-secondary, 'Montserrat', sans-serif);
+    color: var(--brand-light, #F8F4E3);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.5s ease 0.8s, transform 0.5s ease 0.8s;
-    letter-spacing: 1.5px;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+    transform: translateY(20px);
+    transition: all 0.6s ease;
 }
 
 .brand-overlay.visible .brand-text {
-    transform: scale(1);
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .brand-overlay.visible .brand-tagline {
@@ -1124,4 +1162,179 @@ body.menu-open::before {
 .brand-overlay.visible .brand-text .word:nth-child(1) { animation-delay: 0.1s; }
 .brand-overlay.visible .brand-text .word:nth-child(2) { animation-delay: 0.3s; }
 .brand-overlay.visible .brand-tagline .word:nth-child(1) { animation-delay: 1.2s; }
-.brand-overlay.visible .brand-tagline .word:nth-child(2) { animation-delay: 1.4s; } 
+.brand-overlay.visible .brand-tagline .word:nth-child(2) { animation-delay: 1.4s; }
+
+/* Add these language selector and showcase banner styles */
+.showcase-banner {
+    background-color: rgba(var(--dark-color-rgb), 0.8);
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    position: relative;
+    z-index: 50;
+    margin-top: 80px;
+}
+
+.showcase-banner p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.language-selector {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.lang-icon {
+    margin-right: 5px;
+    color: var(--gold-color);
+}
+
+#language-dropdown {
+    background-color: transparent;
+    border: 1px solid var(--gold-color);
+    color: var(--dark-color);
+    padding: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#language-dropdown:focus {
+    outline: none;
+    border-color: var(--gold-color);
+}
+
+.header-transparent #language-dropdown {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+    .language-selector {
+        margin-right: 10px;
+    }
+    
+    #language-dropdown {
+        padding: 3px;
+        font-size: 12px;
+    }
+    
+    .showcase-banner {
+        margin-top: 70px;
+        padding: 8px 0;
+    }
+    
+    .showcase-banner p {
+        font-size: 12px;
+    }
+}
+
+/* Update the header selector to accommodate the language selector */
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    position: relative;
+}
+
+/* In the mobile media query section, update the mobile nav styles */
+@media (max-width: 768px) {
+    /* ... existing mobile styles ... */
+    
+    .language-selector {
+        position: absolute;
+        right: 60px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .mobile-nav-toggle {
+        margin-left: auto;
+    }
+}
+
+/* Add footer-bottom style for the copyright section */
+.footer-bottom {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+    text-align: center;
+}
+
+.footer-bottom p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Letter Animation */
+.animate-letters .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.animate-letters.visible .letter {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.brand-text .letter {
+    animation-name: letterFadeIn;
+    animation-fill-mode: forwards;
+    animation-duration: 0.4s;
+    opacity: 0;
+}
+
+.brand-tagline .letter {
+    animation-name: letterFadeIn;
+    animation-fill-mode: forwards;
+    animation-duration: 0.4s;
+    opacity: 0;
+}
+
+@keyframes letterFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Futuristic Features */
+.gallery-item {
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    overflow: visible;
+}
+
+.gallery-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(var(--brand-gold-rgb), 0.2) 0%, rgba(var(--brand-dark-rgb), 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    border-radius: 10px;
+}
+
+.gallery-item:hover::before {
+    opacity: 1;
+}
+
+.gallery-caption {
+    transform: translateZ(30px);
+    backface-visibility: hidden;
+} 
