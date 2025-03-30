@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const video = document.getElementById('apple-style-video');
     const brandOverlay = document.querySelector('.brand-overlay');
     const brandText = document.querySelector('.brand-text');
+    const brandTagline = document.querySelector('.brand-tagline');
     const videoContainer = document.querySelector('.video-container');
     
     if (video) {
@@ -195,12 +196,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Characters for slot machine effect
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         const finalText = "B.BharatKumar";
+        const finalTagline = "Since 1950s";
         let frameCount = 0;
         const framesPerChar = 3;
         let textUpdateInterval;
         
         // Initialize text
         brandText.textContent = generateRandomString(finalText.length);
+        brandTagline.textContent = "";
         
         // Start video cycle when loaded
         video.addEventListener('loadeddata', function() {
@@ -262,12 +265,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Start with random text
             brandText.textContent = generateRandomString(finalText.length);
+            brandTagline.textContent = "";
             
             // Update text with slot machine effect
             textUpdateInterval = setInterval(() => {
                 frameCount++;
                 
-                // Generate partially completed text
+                // Generate partially completed main text
                 let text = "";
                 for (let i = 0; i < finalText.length; i++) {
                     // If this character position should be finalized
@@ -281,8 +285,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update the display
                 brandText.textContent = text;
                 
+                // Start showing tagline after main text is complete
+                if (frameCount >= finalText.length * framesPerChar) {
+                    // Generate tagline text with slot machine effect
+                    let taglineText = "";
+                    for (let i = 0; i < finalTagline.length; i++) {
+                        // Offset the tagline animation to start after main text completes
+                        const taglineFrame = frameCount - (finalText.length * framesPerChar);
+                        if (taglineFrame >= i * 2) {
+                            taglineText += finalTagline[i];
+                        } else {
+                            taglineText += chars[Math.floor(Math.random() * chars.length)];
+                        }
+                    }
+                    brandTagline.textContent = taglineText;
+                }
+                
                 // If effect is complete
-                if (frameCount >= finalText.length * framesPerChar + 10) {
+                if (frameCount >= finalText.length * framesPerChar + finalTagline.length * 2 + 20) {
                     clearInterval(textUpdateInterval);
                     
                     // After 3 seconds, start the cycle again
