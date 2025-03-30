@@ -143,6 +143,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Close mobile nav when clicking outside
     document.addEventListener('click', function(e) {
+        // Skip if clicking on language selector
+        if (e.target.closest('.language-selector')) {
+            return;
+        }
+        
         if (nav.classList.contains('active') && 
             !e.target.closest('nav') && 
             !e.target.closest('.mobile-nav-toggle')) {
@@ -152,272 +157,287 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Smooth Scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                window.scrollTo({
-                    top: target.offsetTop - 60,
-                    behavior: 'smooth'
-                });
-            }
+    // Preserve language selection when navigating
+    const languageDropdown = document.getElementById('language-dropdown');
+    if (languageDropdown) {
+        // Store the selected language in localStorage
+        languageDropdown.addEventListener('change', function() {
+            localStorage.setItem('preferred-language', this.value);
         });
-    });
-    
-    // Header scroll effect
-    const header = document.querySelector('header');
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 100) {
-            header.style.padding = '10px 0';
-            header.classList.add('scrolled');
-        } else {
-            header.style.padding = '15px 0';
-            header.classList.remove('scrolled');
+        
+        // Set the dropdown to the saved language on page load
+        const savedLanguage = localStorage.getItem('preferred-language');
+        if (savedLanguage) {
+            languageDropdown.value = savedLanguage;
+        }
+    }
+});
+
+// Smooth Scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            window.scrollTo({
+                top: target.offsetTop - 60,
+                behavior: 'smooth'
+            });
         }
     });
+});
+
+// Header scroll effect
+const header = document.querySelector('header');
+window.addEventListener('scroll', function() {
+    if (window.scrollY > 100) {
+        header.style.padding = '10px 0';
+        header.classList.add('scrolled');
+    } else {
+        header.style.padding = '15px 0';
+        header.classList.remove('scrolled');
+    }
+});
+
+// Video Section Enhancement with smooth slot machine effect
+const video = document.getElementById('apple-style-video');
+const brandOverlay = document.querySelector('.brand-overlay');
+const brandText = document.querySelector('.brand-text');
+const brandTagline = document.querySelector('.brand-tagline');
+const videoContainer = document.querySelector('.video-container');
+
+if (video) {
+    let cycleTimer = null;
+    let textTimer = null;
     
-    // Video Section Enhancement with smooth slot machine effect
-    const video = document.getElementById('apple-style-video');
-    const brandOverlay = document.querySelector('.brand-overlay');
-    const brandText = document.querySelector('.brand-text');
-    const brandTagline = document.querySelector('.brand-tagline');
-    const videoContainer = document.querySelector('.video-container');
+    // Set video properties
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = false;
+    video.preload = 'auto';
     
-    if (video) {
-        let cycleTimer = null;
-        let textTimer = null;
+    // Text for display with spaces between words
+    const finalTextArray = "B.Bharat Kumar".split(" ");
+    const finalTaglineArray = "Since 1950s".split(" ");
+    
+    // Characters for slot machine effect
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.";
+    
+    // Initialize text
+    brandText.innerHTML = "";
+    brandTagline.innerHTML = "";
+    
+    // Start video cycle when loaded
+    video.addEventListener('loadeddata', function() {
+        videoContainer.classList.add('loaded');
+        startCycle();
+    });
+    
+    // Handle video errors
+    video.addEventListener('error', function() {
+        console.error('Video loading error');
+        videoContainer.classList.add('paused');
+        brandOverlay.classList.add('visible');
+        showText();
+    });
+    
+    // Main cycle function
+    function startCycle() {
+        // Clear any existing timers
+        clearTimeout(cycleTimer);
+        clearTimeout(textTimer);
+        clearAllAnimationTimers();
         
-        // Set video properties
-        video.muted = true;
-        video.playsInline = true;
-        video.loop = false;
-        video.preload = 'auto';
-        
-        // Text for display with spaces between words
-        const finalTextArray = "B.Bharat Kumar".split(" ");
-        const finalTaglineArray = "Since 1950s".split(" ");
-        
-        // Characters for slot machine effect
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.";
-        
-        // Initialize text
+        // Hide text, show video
+        videoContainer.classList.remove('paused');
+        brandOverlay.classList.remove('visible');
         brandText.innerHTML = "";
         brandTagline.innerHTML = "";
         
-        // Start video cycle when loaded
-        video.addEventListener('loadeddata', function() {
-            videoContainer.classList.add('loaded');
-            startCycle();
-        });
+        // Reset and play video
+        video.currentTime = 0;
         
-        // Handle video errors
-        video.addEventListener('error', function() {
-            console.error('Video loading error');
-            videoContainer.classList.add('paused');
-            brandOverlay.classList.add('visible');
-            showText();
-        });
-        
-        // Main cycle function
-        function startCycle() {
-            // Clear any existing timers
-            clearTimeout(cycleTimer);
-            clearTimeout(textTimer);
-            clearAllAnimationTimers();
-            
-            // Hide text, show video
-            videoContainer.classList.remove('paused');
-            brandOverlay.classList.remove('visible');
-            brandText.innerHTML = "";
-            brandTagline.innerHTML = "";
-            
-            // Reset and play video
-            video.currentTime = 0;
-            
-            // Play video for exactly 4 seconds
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    // After 4 seconds, pause video and show text
-                    cycleTimer = setTimeout(() => {
-                        video.pause();
-                        videoContainer.classList.add('paused');
-                        brandOverlay.classList.add('visible');
-                        showText();
-                    }, 4000);
-                }).catch(error => {
-                    console.log('Auto-play prevented:', error);
+        // Play video for exactly 4 seconds
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                // After 4 seconds, pause video and show text
+                cycleTimer = setTimeout(() => {
+                    video.pause();
                     videoContainer.classList.add('paused');
                     brandOverlay.classList.add('visible');
                     showText();
-                });
-            }
-        }
-        
-        // Animation timers storage
-        const animationTimers = [];
-        
-        // Clear all animation timers
-        function clearAllAnimationTimers() {
-            while(animationTimers.length > 0) {
-                clearTimeout(animationTimers.pop());
-            }
-        }
-        
-        // Show text with enhanced slot machine effect
-        function showText() {
-            // Prepare containers for each word
-            let brandTextHTML = "";
-            for (let i = 0; i < finalTextArray.length; i++) {
-                brandTextHTML += `<span class="word word-${i}" style="opacity: 0;">${generateRandomText(finalTextArray[i].length)}</span> `;
-            }
-            brandText.innerHTML = brandTextHTML;
-            
-            let brandTaglineHTML = "";
-            for (let i = 0; i < finalTaglineArray.length; i++) {
-                brandTaglineHTML += `<span class="word word-${i}" style="opacity: 0;">${generateRandomText(finalTaglineArray[i].length)}</span> `;
-            }
-            brandTagline.innerHTML = brandTaglineHTML;
-            
-            // Get all word elements
-            const mainWords = document.querySelectorAll('.brand-text .word');
-            const taglineWords = document.querySelectorAll('.brand-tagline .word');
-            
-            // Total animation time for all words = 10 seconds
-            const totalAnimTimeMs = 10000;
-            const wordDelay = totalAnimTimeMs / (mainWords.length + taglineWords.length + 1);
-            
-            // Animate main text words one by one
-            mainWords.forEach((wordEl, wordIndex) => {
-                // Delay each word's animation
-                const delay = wordIndex * wordDelay;
-                
-                // Make word visible with delay
-                animationTimers.push(setTimeout(() => {
-                    wordEl.style.opacity = "1";
-                    
-                    // Animate each letter in the word
-                    const word = finalTextArray[wordIndex];
-                    const letterAnimTime = wordDelay / (word.length + 1);
-                    
-                    for (let letterIndex = 0; letterIndex < word.length; letterIndex++) {
-                        // Create slot machine effect for each letter
-                        animateLetterInWord(wordEl, letterIndex, word[letterIndex], letterAnimTime, letterIndex * letterAnimTime);
-                    }
-                }, delay));
+                }, 4000);
+            }).catch(error => {
+                console.log('Auto-play prevented:', error);
+                videoContainer.classList.add('paused');
+                brandOverlay.classList.add('visible');
+                showText();
             });
-            
-            // Animate tagline words with delay after main text
-            const taglineStartDelay = mainWords.length * wordDelay + wordDelay/2;
-            
-            taglineWords.forEach((wordEl, wordIndex) => {
-                const delay = taglineStartDelay + wordIndex * wordDelay;
-                
-                // Make word visible with delay
-                animationTimers.push(setTimeout(() => {
-                    wordEl.style.opacity = "1";
-                    
-                    // Animate each letter in the word
-                    const word = finalTaglineArray[wordIndex];
-                    const letterAnimTime = wordDelay / (word.length + 1);
-                    
-                    for (let letterIndex = 0; letterIndex < word.length; letterIndex++) {
-                        // Create slot machine effect for each letter
-                        animateLetterInWord(wordEl, letterIndex, word[letterIndex], letterAnimTime, letterIndex * letterAnimTime);
-                    }
-                }, delay));
-            });
-            
-            // Schedule next cycle after 30 seconds
-            textTimer = setTimeout(() => {
-                startCycle();
-            }, 30000);
         }
+    }
+    
+    // Animation timers storage
+    const animationTimers = [];
+    
+    // Clear all animation timers
+    function clearAllAnimationTimers() {
+        while(animationTimers.length > 0) {
+            clearTimeout(animationTimers.pop());
+        }
+    }
+    
+    // Show text with enhanced slot machine effect
+    function showText() {
+        // Prepare containers for each word
+        let brandTextHTML = "";
+        for (let i = 0; i < finalTextArray.length; i++) {
+            brandTextHTML += `<span class="word word-${i}" style="opacity: 0;">${generateRandomText(finalTextArray[i].length)}</span> `;
+        }
+        brandText.innerHTML = brandTextHTML;
         
-        // Animate a single letter with slot machine effect
-        function animateLetterInWord(wordEl, letterIndex, finalLetter, duration, delay) {
-            // Generate random characters for the effect (5-10 characters)
-            const numRandomChars = 5 + Math.floor(Math.random() * 6); // 5-10 characters
-            const initialText = wordEl.textContent;
+        let brandTaglineHTML = "";
+        for (let i = 0; i < finalTaglineArray.length; i++) {
+            brandTaglineHTML += `<span class="word word-${i}" style="opacity: 0;">${generateRandomText(finalTaglineArray[i].length)}</span> `;
+        }
+        brandTagline.innerHTML = brandTaglineHTML;
+        
+        // Get all word elements
+        const mainWords = document.querySelectorAll('.brand-text .word');
+        const taglineWords = document.querySelectorAll('.brand-tagline .word');
+        
+        // Total animation time for all words = 10 seconds
+        const totalAnimTimeMs = 10000;
+        const wordDelay = totalAnimTimeMs / (mainWords.length + taglineWords.length + 1);
+        
+        // Animate main text words one by one
+        mainWords.forEach((wordEl, wordIndex) => {
+            // Delay each word's animation
+            const delay = wordIndex * wordDelay;
             
-            // Track the current frame
-            let frame = 0;
-            const totalFrames = numRandomChars;
-            const frameInterval = duration / totalFrames;
+            // Make word visible with delay
+            animationTimers.push(setTimeout(() => {
+                wordEl.style.opacity = "1";
+                
+                // Animate each letter in the word
+                const word = finalTextArray[wordIndex];
+                const letterAnimTime = wordDelay / (word.length + 1);
+                
+                for (let letterIndex = 0; letterIndex < word.length; letterIndex++) {
+                    // Create slot machine effect for each letter
+                    animateLetterInWord(wordEl, letterIndex, word[letterIndex], letterAnimTime, letterIndex * letterAnimTime);
+                }
+            }, delay));
+        });
+        
+        // Animate tagline words with delay after main text
+        const taglineStartDelay = mainWords.length * wordDelay + wordDelay/2;
+        
+        taglineWords.forEach((wordEl, wordIndex) => {
+            const delay = taglineStartDelay + wordIndex * wordDelay;
             
-            // Start animation after specified delay
-            const letterTimer = setTimeout(() => {
-                // Create interval for changing characters
-                const interval = setInterval(() => {
-                    // Get current text and split into array
-                    let textArray = wordEl.textContent.split('');
-                    
-                    // If we've reached the last frame, show the final letter
-                    if (frame >= totalFrames - 1) {
-                        textArray[letterIndex] = finalLetter;
-                        wordEl.textContent = textArray.join('');
-                        clearInterval(interval);
-                        return;
-                    }
-                    
-                    // Otherwise show random character
-                    textArray[letterIndex] = chars.charAt(Math.floor(Math.random() * chars.length));
+            // Make word visible with delay
+            animationTimers.push(setTimeout(() => {
+                wordEl.style.opacity = "1";
+                
+                // Animate each letter in the word
+                const word = finalTaglineArray[wordIndex];
+                const letterAnimTime = wordDelay / (word.length + 1);
+                
+                for (let letterIndex = 0; letterIndex < word.length; letterIndex++) {
+                    // Create slot machine effect for each letter
+                    animateLetterInWord(wordEl, letterIndex, word[letterIndex], letterAnimTime, letterIndex * letterAnimTime);
+                }
+            }, delay));
+        });
+        
+        // Schedule next cycle after 30 seconds
+        textTimer = setTimeout(() => {
+            startCycle();
+        }, 30000);
+    }
+    
+    // Animate a single letter with slot machine effect
+    function animateLetterInWord(wordEl, letterIndex, finalLetter, duration, delay) {
+        // Generate random characters for the effect (5-10 characters)
+        const numRandomChars = 5 + Math.floor(Math.random() * 6); // 5-10 characters
+        const initialText = wordEl.textContent;
+        
+        // Track the current frame
+        let frame = 0;
+        const totalFrames = numRandomChars;
+        const frameInterval = duration / totalFrames;
+        
+        // Start animation after specified delay
+        const letterTimer = setTimeout(() => {
+            // Create interval for changing characters
+            const interval = setInterval(() => {
+                // Get current text and split into array
+                let textArray = wordEl.textContent.split('');
+                
+                // If we've reached the last frame, show the final letter
+                if (frame >= totalFrames - 1) {
+                    textArray[letterIndex] = finalLetter;
                     wordEl.textContent = textArray.join('');
-                    
-                    frame++;
-                }, frameInterval);
+                    clearInterval(interval);
+                    return;
+                }
                 
-                // Store timer reference
-                animationTimers.push(interval);
-            }, delay);
+                // Otherwise show random character
+                textArray[letterIndex] = chars.charAt(Math.floor(Math.random() * chars.length));
+                wordEl.textContent = textArray.join('');
+                
+                frame++;
+            }, frameInterval);
             
             // Store timer reference
-            animationTimers.push(letterTimer);
-        }
+            animationTimers.push(interval);
+        }, delay);
         
-        // Generate random text of specified length
-        function generateRandomText(length) {
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
+        // Store timer reference
+        animationTimers.push(letterTimer);
+    }
+    
+    // Generate random text of specified length
+    function generateRandomText(length) {
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+        return result;
+    }
+    
+    // Start the cycle after a short delay
+    setTimeout(startCycle, 1000);
+}
+
+// Scroll reveal animations
+const animateElements = document.querySelectorAll('.fadeIn');
+
+function checkVisible() {
+    animateElements.forEach(el => {
+        const elementTop = el.getBoundingClientRect().top;
+        const elementVisible = 150;
         
-        // Start the cycle after a short delay
-        setTimeout(startCycle, 1000);
-    }
-    
-    // Animation on scroll
-    const animateElements = document.querySelectorAll('.fadeIn');
-    
-    function checkVisible() {
-        animateElements.forEach(el => {
-            const elementTop = el.getBoundingClientRect().top;
-            const elementVisible = 150;
-            
-            if (elementTop < window.innerHeight - elementVisible) {
-                el.classList.add('visible');
-            }
-        });
-    }
-    
-    window.addEventListener('scroll', checkVisible);
-    checkVisible(); // Check on page load
-    
-    // Handle gallery infinite scrolling
-    const galleryScroll = document.querySelector('.gallery-scroll');
-    if (galleryScroll) {
-        // Force the animation to restart when it ends
-        galleryScroll.addEventListener('animationiteration', () => {
-            // This ensures the animation continues seamlessly
-            galleryScroll.style.animationPlayState = 'running';
-        });
-    }
-});
+        if (elementTop < window.innerHeight - elementVisible) {
+            el.classList.add('visible');
+        }
+    });
+}
+
+window.addEventListener('scroll', checkVisible);
+checkVisible(); // Check on page load
+
+// Handle gallery infinite scrolling
+const galleryScroll = document.querySelector('.gallery-scroll');
+if (galleryScroll) {
+    // Force the animation to restart when it ends
+    galleryScroll.addEventListener('animationiteration', () => {
+        // This ensures the animation continues seamlessly
+        galleryScroll.style.animationPlayState = 'running';
+    });
+}
 
 // Prevent right-clicking and text selection
 document.addEventListener('contextmenu', event => event.preventDefault());

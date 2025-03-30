@@ -271,5 +271,38 @@
     <script src="js/script.js"></script>
     <script src="translate.js"></script>
     <script src="chatbot.js"></script>
+    <script>
+        // Ensure translation system is properly loaded and initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if translations were loaded
+            setTimeout(function() {
+                if (window.translateSystem) {
+                    console.log('Translation system is properly loaded');
+                    
+                    // Force refresh translations if needed
+                    if (typeof window.translateSystem.refreshTranslations === 'function') {
+                        window.translateSystem.refreshTranslations();
+                    }
+                } else {
+                    console.error('Translation system not loaded properly');
+                    
+                    // Try to reload the script
+                    const script = document.createElement('script');
+                    script.src = 'translate.js?v=' + new Date().getTime();
+                    document.body.appendChild(script);
+                    
+                    script.onload = function() {
+                        console.log('Translation script reloaded');
+                        // Initialize translation again after 500ms
+                        setTimeout(function() {
+                            if (window.initTranslation) {
+                                window.initTranslation();
+                            }
+                        }, 500);
+                    };
+                }
+            }, 1000);
+        });
+    </script>
 </body>
 </html> 

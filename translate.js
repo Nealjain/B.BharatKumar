@@ -26,22 +26,50 @@ let currentLanguage = localStorage.getItem('preferred-language') || 'en';
 
 // Initialize the translation system
 async function initTranslation() {
-  // Create language selector
-  createLanguageSelector();
-  
-  // Load translations for current language
-  await loadTranslation(currentLanguage);
-  
-  // Apply translations
-  translatePage();
-  
-  // Showcase notice in current language
-  updateShowcaseNotice();
+  try {
+    console.log('Initializing translation system...');
+    
+    // Create language selector
+    createLanguageSelector();
+    
+    // Load translations for current language
+    const success = await loadTranslation(currentLanguage);
+    
+    if (success) {
+      // Apply translations
+      translatePage();
+      
+      // Showcase notice in current language
+      updateShowcaseNotice();
+      
+      // Set document language
+      document.documentElement.lang = currentLanguage;
+      
+      console.log(`Translation system initialized with language: ${currentLanguage}`);
+    } else {
+      console.error('Failed to initialize translation system');
+    }
+  } catch (error) {
+    console.error('Error initializing translation system:', error);
+    
+    // Fallback to English
+    if (currentLanguage !== 'en') {
+      console.log('Falling back to English...');
+      currentLanguage = 'en';
+      await loadTranslation('en');
+      translatePage();
+    }
+  }
 }
 
 // Create language dropdown in the header
 function createLanguageSelector() {
   const header = document.querySelector('header .container');
+  
+  if (!header) {
+    console.error('Header container not found');
+    return;
+  }
   
   // Create language selector container
   const langSelector = document.createElement('div');
@@ -76,60 +104,134 @@ function createLanguageSelector() {
   
   // Insert before mobile nav toggle
   const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
-  header.insertBefore(langSelector, mobileNavToggle);
+  
+  if (mobileNavToggle) {
+    header.insertBefore(langSelector, mobileNavToggle);
+  } else {
+    // Fallback if mobile nav toggle not found
+    header.appendChild(langSelector);
+  }
+  
+  console.log('Language selector created');
 }
 
 // Load translation file for specified language
 async function loadTranslation(langCode) {
   try {
-    const response = await fetch(`translations/${langCode}.json`);
-    if (!response.ok) {
-      throw new Error(`Failed to load translations for ${langCode}`);
+    console.log(`Loading translations for ${langCode}...`);
+    
+    // Default fallback to English if language not supported
+    if (!languages.some(lang => lang.code === langCode)) {
+      console.warn(`Language ${langCode} not supported, falling back to English`);
+      langCode = 'en';
+      currentLanguage = 'en';
     }
+    
+    const response = await fetch(`translations/${langCode}.json?v=${new Date().getTime()}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to load translations for ${langCode} (Status: ${response.status})`);
+    }
+    
     translations = await response.json();
+    console.log(`Successfully loaded translations for ${langCode}`);
     return true;
   } catch (error) {
     console.error('Error loading translations:', error);
+    
     // Fallback to English if translation file not found
     if (langCode !== 'en') {
+      console.log('Falling back to English translations');
       currentLanguage = 'en';
       return loadTranslation('en');
     }
+    
     return false;
   }
 }
 
 // Switch to a new language
 async function switchLanguage(langCode) {
-  // Save preference
-  localStorage.setItem('preferred-language', langCode);
-  currentLanguage = langCode;
-  
-  // Load new translations
-  const success = await loadTranslation(langCode);
-  if (success) {
-    // Apply translations
-    translatePage();
-    // Update showcase notice
-    updateShowcaseNotice();
-    // Update document language
-    document.documentElement.lang = langCode;
+  try {
+    console.log(`Switching language to ${langCode}...`);
     
-    // Update chatbot language if chatbot is active
-    if (window.updateChatbotLanguage) {
-      window.updateChatbotLanguage(langCode);
+    if (langCode === currentLanguage) {
+      console.log('Already using this language');
+      return;
+    }
+    
+    // Save preference
+    localStorage.setItem('preferred-language', langCode);
+    currentLanguage = langCode;
+    
+    // Show loading indicator
+    const dropdown = document.getElementById('language-dropdown');
+    if (dropdown) {
+      dropdown.classList.add('loading');
+      dropdown.disabled = true;
+    }
+    
+    // Load new translations
+    const success = await loadTranslation(langCode);
+    
+    if (success) {
+      // Apply translations
+      translatePage();
+      
+      // Update showcase notice
+      updateShowcaseNotice();
+      
+      // Update document language
+      document.documentElement.lang = langCode;
+      
+      // Update chatbot language if chatbot is active
+      if (window.updateChatbotLanguage) {
+        window.updateChatbotLanguage(langCode);
+      }
+      
+      console.log(`Successfully switched to ${langCode}`);
+    } else {
+      console.error(`Failed to switch to ${langCode}`);
+    }
+    
+    // Remove loading indicator
+    if (dropdown) {
+      dropdown.classList.remove('loading');
+      dropdown.disabled = false;
+    }
+  } catch (error) {
+    console.error('Error switching language:', error);
+    
+    // Reset dropdown value
+    const dropdown = document.getElementById('language-dropdown');
+    if (dropdown) {
+      dropdown.value = currentLanguage;
+      dropdown.classList.remove('loading');
+      dropdown.disabled = false;
     }
   }
 }
 
 // Apply translations to the page
 function translatePage() {
-  // Get all elements with data-i18n attribute
-  const elements = document.querySelectorAll('[data-i18n]');
-  
-  elements.forEach(element => {
-    const key = element.getAttribute('data-i18n');
-    if (translations[key]) {
+  try {
+    console.log('Applying translations to page...');
+    
+    // Get all elements with data-i18n attribute
+    const elements = document.querySelectorAll('[data-i18n]');
+    
+    if (elements.length === 0) {
+      console.warn('No translatable elements found on page');
+    }
+    
+    elements.forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      
+      if (!translations[key]) {
+        console.warn(`Missing translation for key: ${key}`);
+        return;
+      }
+      
       // If element contains HTML
       if (element.innerHTML.includes('<')) {
         // Preserve HTML tags
@@ -140,31 +242,54 @@ function translatePage() {
       } else {
         element.textContent = translations[key];
       }
+    });
+    
+    // Handle placeholders
+    const inputs = document.querySelectorAll('[data-i18n-placeholder]');
+    inputs.forEach(input => {
+      const key = input.getAttribute('data-i18n-placeholder');
+      if (translations[key]) {
+        input.placeholder = translations[key];
+      } else {
+        console.warn(`Missing translation for placeholder key: ${key}`);
+      }
+    });
+    
+    // Update document title
+    if (translations['page_title']) {
+      document.title = translations['page_title'];
     }
-  });
-  
-  // Handle placeholders
-  const inputs = document.querySelectorAll('[data-i18n-placeholder]');
-  inputs.forEach(input => {
-    const key = input.getAttribute('data-i18n-placeholder');
-    if (translations[key]) {
-      input.placeholder = translations[key];
-    }
-  });
-  
-  // Update document title
-  if (translations['page_title']) {
-    document.title = translations['page_title'];
+    
+    console.log('Translations applied successfully');
+  } catch (error) {
+    console.error('Error applying translations:', error);
   }
 }
 
 // Update showcase notice with current language
 function updateShowcaseNotice() {
-  const showcaseNotice = document.querySelector('.showcase-notice');
-  if (showcaseNotice && translations['showcase_notice']) {
-    showcaseNotice.textContent = translations['showcase_notice'];
+  try {
+    const showcaseNotice = document.querySelector('.showcase-notice');
+    if (showcaseNotice && translations['showcase_notice']) {
+      showcaseNotice.textContent = translations['showcase_notice'];
+    }
+  } catch (error) {
+    console.error('Error updating showcase notice:', error);
   }
 }
+
+// Utility function to get a translation by key
+function getTranslation(key, fallback = '') {
+  if (translations[key]) {
+    return translations[key];
+  }
+  
+  console.warn(`Missing translation for key: ${key}`);
+  return fallback || key;
+}
+
+// Export the initTranslation function to the window object
+window.initTranslation = initTranslation;
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initTranslation);
@@ -173,5 +298,6 @@ document.addEventListener('DOMContentLoaded', initTranslation);
 window.translateSystem = {
   switchLanguage,
   getCurrentLanguage: () => currentLanguage,
-  translate: (key) => translations[key] || key
+  translate: getTranslation,
+  refreshTranslations: translatePage
 }; 

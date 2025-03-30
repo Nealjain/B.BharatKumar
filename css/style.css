@@ -1166,93 +1166,202 @@ body.menu-open::before {
 
 /* Add these language selector and showcase banner styles */
 .showcase-banner {
-    background-color: rgba(var(--dark-color-rgb), 0.8);
-    color: white;
+    background: linear-gradient(to right, var(--dark), var(--brand-accent), var(--dark));
+    color: var(--white);
     padding: 10px 0;
     text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: relative;
-    z-index: 50;
+    z-index: 90;
     margin-top: 80px;
 }
 
 .showcase-banner p {
     margin: 0;
-    font-size: 14px;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    color: var(--light-color);
 }
 
+/* Language Selector Styling */
 .language-selector {
+    position: relative;
     display: flex;
     align-items: center;
-    margin-right: 15px;
+    margin-right: 20px;
+    transition: all 0.3s ease;
+}
+
+.language-selector:hover .lang-icon {
+    transform: rotate(15deg);
 }
 
 .lang-icon {
-    margin-right: 5px;
-    color: var(--gold-color);
+    color: var(--gold);
+    margin-right: 8px;
+    transition: transform 0.3s ease;
 }
 
 #language-dropdown {
-    background-color: transparent;
-    border: 1px solid var(--gold-color);
-    color: var(--dark-color);
-    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--gold);
     border-radius: 4px;
+    color: var(--dark);
+    font-family: var(--font-secondary);
+    font-size: 0.85rem;
+    padding: 6px 28px 6px 10px;
     cursor: pointer;
-    font-size: 14px;
-}
-
-#language-dropdown:focus {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: all 0.3s ease;
     outline: none;
-    border-color: var(--gold-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.header-transparent #language-dropdown {
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3);
+#language-dropdown:hover, 
+#language-dropdown:focus {
+    border-color: var(--gold-dark);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    background-color: white;
 }
 
+/* Add loading indicator for language dropdown */
+#language-dropdown.loading {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83'%3E%3C/path%3E%3C/svg%3E");
+    animation: spin 1.5s linear infinite;
+    background-position: right 8px center;
+    opacity: 0.7;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Enhanced showcase banner */
+.showcase-banner {
+    background: linear-gradient(to right, var(--dark), var(--brand-accent), var(--dark));
+    color: var(--white);
+    padding: 10px 0;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 90;
+    margin-top: 80px;
+}
+
+.showcase-banner p {
+    margin: 0;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    color: var(--light-color);
+}
+
+/* Enhance language selector with gold accent to match jewelry theme */
+.language-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    transition: all 0.3s ease;
+}
+
+.language-selector:hover .lang-icon {
+    transform: rotate(15deg);
+}
+
+.lang-icon {
+    color: var(--gold);
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+}
+
+#language-dropdown {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    color: var(--dark);
+    font-family: var(--font-secondary);
+    font-size: 0.85rem;
+    padding: 6px 28px 6px 10px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: all 0.3s ease;
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+#language-dropdown:hover, 
+#language-dropdown:focus {
+    border-color: var(--gold-dark);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    background-color: white;
+}
+
+/* Fix for language dropdown in mobile menu */
 @media (max-width: 768px) {
+    header .container {
+        padding: 0 10px;
+        justify-content: space-between;
+    }
+    
+    .language-selector {
+        margin-right: 15px;
+        order: 2;
+        z-index: 110;
+    }
+    
+    .lang-icon {
+        margin-right: 5px;
+    }
+    
+    #language-dropdown {
+        padding: 4px 20px 4px 5px;
+        font-size: 0.75rem;
+        max-width: 85px;
+        background-position: right 5px center;
+    }
+    
+    .showcase-banner {
+        margin-top: 60px;
+        padding: 8px 0;
+    }
+    
+    .showcase-banner p {
+        font-size: 0.8rem;
+    }
+    
+    .mobile-nav-toggle {
+        order: 3;
+        z-index: 110;
+    }
+}
+
+@media (max-width: 480px) {
     .language-selector {
         margin-right: 10px;
     }
     
     #language-dropdown {
-        padding: 3px;
-        font-size: 12px;
+        padding: 3px 18px 3px 4px;
+        font-size: 0.7rem;
+        max-width: 75px;
+        background-position: right 4px center;
     }
     
     .showcase-banner {
-        margin-top: 70px;
-        padding: 8px 0;
+        margin-top: 55px;
+        padding: 6px 0;
     }
     
     .showcase-banner p {
-        font-size: 12px;
-    }
-}
-
-/* Update the header selector to accommodate the language selector */
-header .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 0;
-    position: relative;
-}
-
-/* In the mobile media query section, update the mobile nav styles */
-@media (max-width: 768px) {
-    /* ... existing mobile styles ... */
-    
-    .language-selector {
-        position: absolute;
-        right: 60px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    
-    .mobile-nav-toggle {
-        margin-left: auto;
+        font-size: 0.75rem;
+        padding: 0 10px;
     }
 }
 
