@@ -32,7 +32,8 @@ const CONFIG = {
         { name: 'Optimize performance', weight: 2 },
         { name: 'Enhance visual appeal', weight: 3 },
         { name: 'Add accessibility features', weight: 2 },
-        { name: 'Ensure showcase-only compliance', weight: 4 } // Higher weight for compliance
+        { name: 'Ensure showcase-only compliance', weight: 4 }, // Higher weight for compliance
+        { name: 'Fix UI errors', weight: 5 }  // Highest priority for error fixing
     ],
     enhancementLog: 'enhancement-log.json',
     // Business requirements
@@ -43,6 +44,46 @@ const CONFIG = {
         secondaryFocus: "gold",      // Secondary business focus
         noBuyOptions: true,          // No buy or order buttons
         noMisleadingInfo: true       // No misleading claims about sales
+    },
+    // New error detection settings
+    errorDetection: {
+        enabled: true,
+        runBeforeEnhancements: true, // First check for errors, then do enhancements
+        screenshotPath: './ui-validation/',
+        validationInterval: 4 * 60 * 60 * 1000, // 4 hours between validations
+        retryOnError: true,
+        maxRetries: 3,
+        viewports: [
+            { width: 1920, height: 1080, name: 'desktop' },
+            { width: 768, height: 1024, name: 'tablet' },
+            { width: 375, height: 812, name: 'mobile' }
+        ]
+    },
+    // Self-healing settings
+    selfHealing: {
+        enabled: true,
+        knownIssues: [
+            { 
+                pattern: /Error: (.*?)is not defined/i, 
+                fix: 'script-variable-undefined'
+            },
+            {
+                pattern: /Uncaught TypeError: Cannot read properties of (null|undefined)/i,
+                fix: 'dom-null-reference'
+            },
+            {
+                pattern: /404 Not Found: (.*?\.(?:js|css|png|jpg|svg))/i,
+                fix: 'missing-resource'
+            },
+            {
+                pattern: /@media query expression .* is invalid/i,
+                fix: 'invalid-media-query'
+            },
+            {
+                pattern: /Uncaught SyntaxError: (.*)/i,
+                fix: 'syntax-error'
+            }
+        ]
     }
 };
 
@@ -900,7 +941,454 @@ async function commitAndPushChanges(enhancement) {
     }
 }
 
-// Main enhancement process
+// Add new function for UI validation and error detection
+async function validateUI() {
+    if (!CONFIG.errorDetection.enabled) {
+        console.log('UI validation is disabled');
+        return { success: true, errors: [] };
+    }
+    
+    try {
+        console.log('Starting UI validation...');
+        
+        // Try to require puppeteer
+        let puppeteer;
+        try {
+            puppeteer = require('puppeteer');
+        } catch (err) {
+            console.warn('Puppeteer not found. Installing puppeteer...');
+            await executeCommand('npm install puppeteer');
+            puppeteer = require('puppeteer');
+        }
+        
+        // Create screenshot directory if it doesn't exist
+        if (!fs.existsSync(CONFIG.errorDetection.screenshotPath)) {
+            fs.mkdirSync(CONFIG.errorDetection.screenshotPath, { recursive: true });
+        }
+        
+        // Launch headless browser
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        
+        // Create a new page
+        const page = await browser.newPage();
+        
+        // Configure console logging
+        const errors = [];
+        page.on('console', msg => {
+            if (msg.type() === 'error') {
+                console.error(`Console error: ${msg.text()}`);
+                errors.push({ type: 'console', message: msg.text() });
+            }
+        });
+        
+        // Collect all failed requests
+        page.on('requestfailed', request => {
+            const failureText = request.failure().errorText;
+            const url = request.url();
+            console.error(`Request failed: ${url} - ${failureText}`);
+            errors.push({ type: 'request', url, message: failureText });
+        });
+        
+        // Test each viewport (responsive design)
+        for (const viewport of CONFIG.errorDetection.viewports) {
+            console.log(`Testing viewport: ${viewport.name} (${viewport.width}x${viewport.height})`);
+            
+            // Set viewport
+            await page.setViewport({
+                width: viewport.width,
+                height: viewport.height
+            });
+            
+            // Navigate to the page (local file)
+            const timestamp = new Date().toISOString().replace(/:/g, '-');
+            const htmlPath = path.resolve('index.html');
+            await page.goto(`file://${htmlPath}`);
+            
+            // Wait for page to be fully loaded
+            await page.waitForTimeout(2000);
+            
+            // Take a screenshot
+            await page.screenshot({ 
+                path: `${CONFIG.errorDetection.screenshotPath}/screenshot-${viewport.name}-${timestamp}.png`,
+                fullPage: true
+            });
+            
+            // Run UI tests
+            const viewportErrors = await page.evaluate(() => {
+                const uiErrors = [];
+                
+                // Check for overlapping elements
+                const elements = document.querySelectorAll('*');
+                const visibleElements = [...elements].filter(el => {
+                    const style = window.getComputedStyle(el);
+                    return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+                });
+                
+                // Check for elements that overflow the viewport
+                visibleElements.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.width > window.innerWidth + 5) {
+                        uiErrors.push({
+                            type: 'overflow',
+                            element: el.tagName + (el.id ? `#${el.id}` : (el.className ? `.${el.className.replace(/\s+/g, '.')}` : '')),
+                            message: `Element overflows viewport horizontally: width ${rect.width}px (viewport: ${window.innerWidth}px)`
+                        });
+                    }
+                });
+                
+                // Check for font sizes too small to read
+                visibleElements.forEach(el => {
+                    const style = window.getComputedStyle(el);
+                    const fontSize = parseFloat(style.fontSize);
+                    if (fontSize < 10 && el.textContent.trim().length > 0) {
+                        uiErrors.push({
+                            type: 'font-size',
+                            element: el.tagName + (el.id ? `#${el.id}` : (el.className ? `.${el.className.replace(/\s+/g, '.')}` : '')),
+                            message: `Font size too small: ${fontSize}px`
+                        });
+                    }
+                });
+                
+                // Check for color contrast issues
+                visibleElements.forEach(el => {
+                    if (el.textContent.trim().length === 0) return;
+                    
+                    const style = window.getComputedStyle(el);
+                    const color = style.color.match(/\d+/g);
+                    const backgroundColor = style.backgroundColor.match(/\d+/g);
+                    
+                    if (color && backgroundColor && backgroundColor.length >= 3) {
+                        // Simple luminance calculation
+                        const colorLum = (0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]) / 255;
+                        const bgLum = (0.299 * backgroundColor[0] + 0.587 * backgroundColor[1] + 0.114 * backgroundColor[2]) / 255;
+                        
+                        const contrast = Math.abs(colorLum - bgLum);
+                        
+                        if (contrast < 0.3) {
+                            uiErrors.push({
+                                type: 'contrast',
+                                element: el.tagName + (el.id ? `#${el.id}` : (el.className ? `.${el.className.replace(/\s+/g, '.')}` : '')),
+                                message: `Poor text contrast detected (${contrast.toFixed(2)})`
+                            });
+                        }
+                    }
+                });
+                
+                // Check for missing images
+                const images = document.querySelectorAll('img');
+                images.forEach(img => {
+                    if (!img.complete || img.naturalHeight === 0) {
+                        uiErrors.push({
+                            type: 'image',
+                            element: img.tagName + (img.id ? `#${img.id}` : (img.className ? `.${img.className.replace(/\s+/g, '.')}` : '')),
+                            message: `Image failed to load: ${img.src}`
+                        });
+                    }
+                });
+                
+                return uiErrors;
+            });
+            
+            // Add viewport-specific errors
+            viewportErrors.forEach(error => {
+                errors.push({
+                    ...error,
+                    viewport: viewport.name
+                });
+            });
+        }
+        
+        await browser.close();
+        
+        console.log(`UI validation completed. Found ${errors.length} errors.`);
+        if (errors.length > 0) {
+            console.error('UI Errors:', JSON.stringify(errors, null, 2));
+        }
+        
+        return {
+            success: errors.length === 0,
+            errors: errors
+        };
+    } catch (err) {
+        console.error('Error during UI validation:', err);
+        return {
+            success: false,
+            errors: [{ type: 'system', message: err.message }]
+        };
+    }
+}
+
+// Enhanced function to fix UI errors
+function generateErrorFix(errors) {
+    const enhancement = {
+        file: '',
+        type: 'Fix UI errors',
+        description: 'Fixed UI errors detected during validation',
+        changes: []
+    };
+    
+    // Group errors by file
+    const errorsByFile = {};
+    for (const error of errors) {
+        // Determine which file is likely causing the error
+        let targetFile = '';
+        
+        if (error.type === 'request' && error.url) {
+            // Extract the filename from the URL
+            const urlParts = error.url.split('/');
+            const filename = urlParts[urlParts.length - 1];
+            
+            if (filename.endsWith('.css')) {
+                targetFile = 'css/style.css';
+            } else if (filename.endsWith('.js')) {
+                targetFile = 'js/script.js';
+            } else {
+                targetFile = 'index.html';
+            }
+        } else if (error.type === 'console') {
+            // Check error message to identify the file
+            if (error.message.includes('.css') || error.message.includes('CSS')) {
+                targetFile = 'css/style.css';
+            } else if (error.message.includes('.js') || error.message.includes('script')) {
+                targetFile = 'js/script.js';
+            } else {
+                targetFile = 'index.html';
+            }
+        } else {
+            // For UI errors, default to HTML
+            targetFile = 'index.html';
+        }
+        
+        if (!errorsByFile[targetFile]) {
+            errorsByFile[targetFile] = [];
+        }
+        
+        errorsByFile[targetFile].push(error);
+    }
+    
+    // Process errors for each file
+    for (const [file, fileErrors] of Object.entries(errorsByFile)) {
+        // Read file content
+        let fileContent = readFile(file);
+        if (!fileContent) continue;
+        
+        let changes = [];
+        
+        for (const error of fileErrors) {
+            // Try to detect known issues
+            for (const knownIssue of CONFIG.selfHealing.knownIssues) {
+                const errorMessage = error.message || '';
+                
+                if (knownIssue.pattern.test(errorMessage)) {
+                    console.log(`Found known issue: ${knownIssue.fix}`);
+                    
+                    switch (knownIssue.fix) {
+                        case 'script-variable-undefined': {
+                            // Extract the variable name
+                            const match = errorMessage.match(/Error: (.*?) is not defined/i);
+                            if (match && match[1]) {
+                                const varName = match[1].trim();
+                                changes.push({
+                                    type: 'add',
+                                    position: fileContent.indexOf('document.addEventListener'),
+                                    content: `\n// Auto-fix: Define missing variable\nlet ${varName};\n\n`
+                                });
+                            }
+                            break;
+                        }
+                        
+                        case 'dom-null-reference': {
+                            // Add null checks to DOM selectors
+                            if (file.endsWith('.js')) {
+                                // Enhance querySelector calls with null checks
+                                changes.push({
+                                    type: 'replace',
+                                    search: /const (\w+) = document\.querySelector\(['"]([^'"]+)['"]\);/g,
+                                    replacement: 'const $1 = document.querySelector(\'$2\');\nif ($1) {'
+                                });
+                                
+                                // Close the if statements at the end of blocks
+                                changes.push({
+                                    type: 'replace',
+                                    search: /(\w+)\.addEventListener\(['"](\w+)['"], function\((.*?)\) {([\s\S]*?)}\);/g,
+                                    replacement: '$1.addEventListener(\'$2\', function($3) {$4});\n}'
+                                });
+                            }
+                            break;
+                        }
+                        
+                        case 'missing-resource': {
+                            // Extract the missing resource path
+                            const match = errorMessage.match(/404 Not Found: (.*?\.(?:js|css|png|jpg|svg))/i);
+                            if (match && match[1]) {
+                                const resource = match[1].trim();
+                                const filename = resource.split('/').pop();
+                                
+                                if (filename.endsWith('.js')) {
+                                    // Remove the script tag if it's a missing JS file
+                                    changes.push({
+                                        type: 'replace',
+                                        search: new RegExp(`<script[^>]*?src=["']${filename}["'][^>]*?>.*?</script>`, 'i'),
+                                        replacement: `<!-- Auto-removed missing script: ${filename} -->`
+                                    });
+                                } else if (filename.endsWith('.css')) {
+                                    // Remove the link tag if it's a missing CSS file
+                                    changes.push({
+                                        type: 'replace',
+                                        search: new RegExp(`<link[^>]*?href=["']${filename}["'][^>]*?>`, 'i'),
+                                        replacement: `<!-- Auto-removed missing stylesheet: ${filename} -->`
+                                    });
+                                } else if (/\.(png|jpg|jpeg|gif|svg)$/i.test(filename)) {
+                                    // Replace missing images with a placeholder
+                                    changes.push({
+                                        type: 'replace',
+                                        search: new RegExp(`<img[^>]*?src=["'][^"']*${filename}["'][^>]*?>`, 'i'),
+                                        replacement: `<img src="https://placehold.co/600x400/gold/white?text=Image" alt="Placeholder" loading="lazy">`
+                                    });
+                                }
+                            }
+                            break;
+                        }
+                        
+                        case 'invalid-media-query': {
+                            if (file.endsWith('.css')) {
+                                // Fix invalid media queries
+                                changes.push({
+                                    type: 'replace',
+                                    search: /@media[^{]+?{/g,
+                                    replacement: (match) => {
+                                        // Sanitize the media query
+                                        return match.replace(/\s+and\s+and\s+/g, ' and ')
+                                            .replace(/\(\s*max-width\s*:\s*\)/g, '(max-width: 768px)')
+                                            .replace(/\(\s*min-width\s*:\s*\)/g, '(min-width: 768px)');
+                                    }
+                                });
+                            }
+                            break;
+                        }
+                        
+                        case 'syntax-error': {
+                            if (file.endsWith('.js')) {
+                                // Check for common syntax errors like missing semicolons
+                                changes.push({
+                                    type: 'replace',
+                                    search: /}\n\s*const/g,
+                                    replacement: '};\n\nconst'
+                                });
+                                
+                                changes.push({
+                                    type: 'replace',
+                                    search: /}\n\s*let/g,
+                                    replacement: '};\n\nlet'
+                                });
+                                
+                                changes.push({
+                                    type: 'replace',
+                                    search: /}\n\s*var/g,
+                                    replacement: '};\n\nvar'
+                                });
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Specific fixes based on error type
+            if (error.type === 'overflow' && error.element) {
+                if (file.endsWith('.css')) {
+                    // Add max-width constraint to overflowing elements
+                    const elementSelector = error.element
+                        .replace(/\#/g, '\\#') // Escape # for CSS selectors
+                        .replace(/\./g, '\\.'); // Escape . for CSS selectors
+                    
+                    if (fileContent.includes(elementSelector)) {
+                        // Update existing selector
+                        changes.push({
+                            type: 'replace',
+                            search: new RegExp(`${elementSelector}\\s*{[^}]*}`, 'g'),
+                            replacement: (match) => {
+                                if (match.includes('max-width')) {
+                                    return match.replace(/max-width:[^;]+;/, 'max-width: 100%;');
+                                } else {
+                                    return match.replace('{', '{\n    max-width: 100%;');
+                                }
+                            }
+                        });
+                    } else {
+                        // Add new selector
+                        changes.push({
+                            type: 'add',
+                            position: fileContent.lastIndexOf('}') + 1,
+                            content: `\n\n/* Auto-fix: Fix overflowing element */\n${error.element} {\n    max-width: 100%;\n    overflow-x: hidden;\n}\n`
+                        });
+                    }
+                }
+            } else if (error.type === 'font-size' && error.element) {
+                if (file.endsWith('.css')) {
+                    // Increase font size for better readability
+                    const elementSelector = error.element
+                        .replace(/\#/g, '\\#')
+                        .replace(/\./g, '\\.');
+                    
+                    changes.push({
+                        type: 'add',
+                        position: fileContent.lastIndexOf('}') + 1,
+                        content: `\n\n/* Auto-fix: Fix small font size */\n${error.element} {\n    font-size: 12px !important;\n}\n`
+                    });
+                }
+            } else if (error.type === 'contrast') {
+                if (file.endsWith('.css')) {
+                    // Improve contrast for better readability
+                    const elementSelector = error.element
+                        .replace(/\#/g, '\\#')
+                        .replace(/\./g, '\\.');
+                    
+                    changes.push({
+                        type: 'add',
+                        position: fileContent.lastIndexOf('}') + 1,
+                        content: `\n\n/* Auto-fix: Improve text contrast */\n${error.element} {\n    color: var(--dark) !important;\n    text-shadow: 0 0 1px rgba(255,255,255,0.5);\n}\n`
+                    });
+                }
+            } else if (error.type === 'image') {
+                if (file.endsWith('.html')) {
+                    // Fix broken images
+                    const imgSrc = error.message.match(/Image failed to load: ([^\s]+)/);
+                    if (imgSrc && imgSrc[1]) {
+                        changes.push({
+                            type: 'replace',
+                            search: new RegExp(`<img[^>]*?src=["']${imgSrc[1]}["'][^>]*?>`, 'gi'),
+                            replacement: `<img src="https://placehold.co/600x400/gold/white?text=Jewelry" alt="Jewelry placeholder" loading="lazy">`
+                        });
+                    }
+                }
+            }
+        }
+        
+        // Add fixing changes to enhancement
+        if (changes.length > 0) {
+            enhancement.file = file;
+            enhancement.changes = changes;
+            break; // Only fix one file at a time
+        }
+    }
+    
+    if (enhancement.changes.length === 0) {
+        enhancement.file = 'index.html';
+        enhancement.changes.push({
+            type: 'add',
+            position: 0,
+            content: '<!-- No auto-fixable errors found -->'
+        });
+    }
+    
+    return enhancement;
+}
+
+// Extend main enhancement process to include validation
 async function runEnhancement() {
     console.log('Starting auto-enhancement process...');
     
@@ -915,6 +1403,50 @@ async function runEnhancement() {
         return false;
     }
     
+    // Run UI validation first if enabled
+    if (CONFIG.errorDetection.enabled && CONFIG.errorDetection.runBeforeEnhancements) {
+        console.log('Running UI validation before enhancements...');
+        const validationResult = await validateUI();
+        
+        if (!validationResult.success) {
+            console.log(`Found ${validationResult.errors.length} UI errors. Fixing before enhancing...`);
+            
+            // Generate fixes for the errors
+            const errorFix = generateErrorFix(validationResult.errors);
+            
+            if (errorFix.changes.length > 0) {
+                // Apply the fixes
+                const applied = applyEnhancement(errorFix);
+                
+                if (applied) {
+                    // Commit and push the fixes
+                    const pushed = await commitAndPushChanges({
+                        ...errorFix,
+                        description: `Fixed ${validationResult.errors.length} UI errors`
+                    });
+                    
+                    if (pushed) {
+                        // Update enhancement log
+                        log.lastRun = now;
+                        log.enhancements.push({
+                            timestamp: now,
+                            file: errorFix.file,
+                            type: errorFix.type,
+                            description: `Fixed ${validationResult.errors.length} UI errors`
+                        });
+                        
+                        // Save updated log
+                        saveEnhancementLog(log);
+                        
+                        console.log('UI error fixes applied successfully!');
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Proceed with regular enhancements
     // Select target file
     const targetFile = selectTargetFile();
     
@@ -961,6 +1493,19 @@ async function runEnhancement() {
     saveEnhancementLog(log);
     
     console.log('Enhancement process completed successfully!');
+    
+    // Run validation after enhancement if enabled
+    if (CONFIG.errorDetection.enabled && !CONFIG.errorDetection.runBeforeEnhancements) {
+        console.log('Running UI validation after enhancements...');
+        const validationResult = await validateUI();
+        
+        if (!validationResult.success) {
+            console.log(`Found ${validationResult.errors.length} UI errors after enhancement. Will fix in next run.`);
+        } else {
+            console.log('UI validation passed after enhancement!');
+        }
+    }
+    
     return true;
 }
 
