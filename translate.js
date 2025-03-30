@@ -46,10 +46,10 @@ let currentLanguage = userLanguage || detectUserLanguage();
 // Initialize the translation system
 async function initTranslation() {
   try {
-    console.log('Initializing automatic translation system...');
+    console.log('Initializing translation system...');
     
-    // Add English toggle button (hidden in footer)
-    addEnglishToggle();
+    // Create language selector dropdown
+    createLanguageSelector();
     
     // Load translations for current language
     const success = await loadTranslation(currentLanguage);
@@ -78,40 +78,57 @@ async function initTranslation() {
   }
 }
 
-// Add a small English toggle link in the footer
-function addEnglishToggle() {
-  const footerBottom = document.querySelector('.footer-bottom');
+// Create language dropdown in the header
+function createLanguageSelector() {
+  const header = document.querySelector('header .container');
   
-  if (!footerBottom) {
-    console.warn('Footer bottom not found, cannot add English toggle');
+  if (!header) {
+    console.error('Header container not found');
     return;
   }
   
-  // Only show toggle if not already in English
-  if (currentLanguage !== 'en') {
-    const toggleLink = document.createElement('a');
-    toggleLink.href = '#';
-    toggleLink.textContent = 'English';
-    toggleLink.style.marginLeft = '15px';
-    toggleLink.style.fontSize = '12px';
-    toggleLink.style.color = 'rgba(255,255,255,0.5)';
-    
-    toggleLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      switchLanguage('en');
-      toggleLink.style.display = 'none';
-    });
-    
-    const copyright = footerBottom.querySelector('p');
-    if (copyright) {
-      copyright.appendChild(document.createTextNode(' '));
-      copyright.appendChild(toggleLink);
-    } else {
-      footerBottom.appendChild(toggleLink);
-    }
-    
-    console.log('Added English toggle to footer');
+  // Create language selector container
+  const langSelector = document.createElement('div');
+  langSelector.className = 'language-selector';
+  
+  // Create dropdown
+  const dropdown = document.createElement('select');
+  dropdown.id = 'language-dropdown';
+  dropdown.setAttribute('aria-label', 'Select language');
+  
+  // Add language options
+  languages.forEach(lang => {
+    const option = document.createElement('option');
+    option.value = lang.code;
+    option.textContent = lang.name;
+    option.selected = lang.code === currentLanguage;
+    dropdown.appendChild(option);
+  });
+  
+  // Add event listener for language change
+  dropdown.addEventListener('change', (e) => {
+    switchLanguage(e.target.value);
+  });
+  
+  // Add label and dropdown to container
+  const label = document.createElement('span');
+  label.className = 'lang-icon';
+  label.innerHTML = '<i class="fas fa-globe"></i>';
+  
+  langSelector.appendChild(label);
+  langSelector.appendChild(dropdown);
+  
+  // Insert before mobile nav toggle
+  const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
+  
+  if (mobileNavToggle) {
+    header.insertBefore(langSelector, mobileNavToggle);
+  } else {
+    // Fallback if mobile nav toggle not found
+    header.appendChild(langSelector);
   }
+  
+  console.log('Language selector created');
 }
 
 // Load translation file for specified language
@@ -163,6 +180,13 @@ async function switchLanguage(langCode) {
     localStorage.setItem('preferred-language', langCode);
     currentLanguage = langCode;
     
+    // Show loading indicator
+    const dropdown = document.getElementById('language-dropdown');
+    if (dropdown) {
+      dropdown.classList.add('loading');
+      dropdown.disabled = true;
+    }
+    
     // Load new translations
     const success = await loadTranslation(langCode);
     
@@ -180,13 +204,35 @@ async function switchLanguage(langCode) {
       
       console.log(`Successfully switched to ${langCode}`);
       
+      // Remove loading indicator before reloading
+      if (dropdown) {
+        dropdown.classList.remove('loading');
+        dropdown.disabled = false;
+      }
+      
       // Reload page to ensure proper application of translations
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
     } else {
       console.error(`Failed to switch to ${langCode}`);
+      
+      // Remove loading indicator
+      if (dropdown) {
+        dropdown.classList.remove('loading');
+        dropdown.disabled = false;
+      }
     }
   } catch (error) {
     console.error('Error switching language:', error);
+    
+    // Reset dropdown value
+    const dropdown = document.getElementById('language-dropdown');
+    if (dropdown) {
+      dropdown.value = currentLanguage;
+      dropdown.classList.remove('loading');
+      dropdown.disabled = false;
+    }
   }
 }
 
