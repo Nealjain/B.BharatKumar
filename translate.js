@@ -1,47 +1,19 @@
 /**
  * B.BharatKumar Website Translation System
- * This script handles automatic translation based on user's browser language
+ * Simple translation between English and Hindi
  */
 
-// Available languages configuration
+// Available languages configuration - simplify to just English and Hindi
 const languages = [
   { code: 'en', name: 'English' },
-  { code: 'hi', name: 'हिन्दी' },
-  { code: 'mr', name: 'मराठी' },
-  { code: 'gu', name: 'ગુજરાતી' },
-  { code: 'ta', name: 'தமிழ்' },
-  { code: 'te', name: 'తెలుగు' },
-  { code: 'kn', name: 'ಕನ್ನಡ' },
-  { code: 'bn', name: 'বাংলা' },
-  { code: 'ar', name: 'العربية' },
-  { code: 'fr', name: 'Français' },
-  { code: 'es', name: 'Español' }
+  { code: 'hi', name: 'हिन्दी' }
 ];
 
 // Translation data - will be loaded from JSON files
 let translations = {};
 
-// Get browser language and determine best match from available languages
-function detectUserLanguage() {
-  // Get user's browser language preference (e.g., 'en-US', 'hi', etc.)
-  const browserLang = navigator.language || navigator.userLanguage || 'en';
-  
-  // Extract the primary language code (e.g., 'en' from 'en-US')
-  const primaryLang = browserLang.split('-')[0];
-  
-  console.log(`Browser language detected: ${browserLang}, primary: ${primaryLang}`);
-  
-  // Check if we support this language
-  const languageMatch = languages.find(lang => lang.code === primaryLang);
-  
-  // Return the matched language code or 'en' as fallback
-  return languageMatch ? primaryLang : 'en';
-}
-
-// Get user's preferred language
-const userLanguage = localStorage.getItem('preferred-language');
-// Current language - auto-detect if not set
-let currentLanguage = userLanguage || detectUserLanguage();
+// Current language - default to English
+let currentLanguage = localStorage.getItem('preferred-language') || 'en';
 
 // Initialize the translation system
 async function initTranslation() {
@@ -64,17 +36,21 @@ async function initTranslation() {
       console.log(`Translation system initialized with language: ${currentLanguage}`);
     } else {
       console.error('Failed to initialize translation system');
+      
+      // Fallback to English
+      if (currentLanguage !== 'en') {
+        currentLanguage = 'en';
+        await loadTranslation('en');
+        translatePage();
+      }
     }
   } catch (error) {
     console.error('Error initializing translation system:', error);
     
     // Fallback to English
-    if (currentLanguage !== 'en') {
-      console.log('Falling back to English...');
-      currentLanguage = 'en';
-      await loadTranslation('en');
-      translatePage();
-    }
+    currentLanguage = 'en';
+    await loadTranslation('en');
+    translatePage();
   }
 }
 
@@ -136,22 +112,28 @@ async function loadTranslation(langCode) {
   try {
     console.log(`Loading translations for ${langCode}...`);
     
-    // Default fallback to English if language not supported
-    if (!languages.some(lang => lang.code === langCode)) {
+    // Force fallback to English if not supported
+    if (langCode !== 'en' && langCode !== 'hi') {
       console.warn(`Language ${langCode} not supported, falling back to English`);
       langCode = 'en';
       currentLanguage = 'en';
     }
     
+    // Add cache-busting parameter
     const response = await fetch(`translations/${langCode}.json?v=${new Date().getTime()}`);
     
     if (!response.ok) {
       throw new Error(`Failed to load translations for ${langCode} (Status: ${response.status})`);
     }
     
-    translations = await response.json();
-    console.log(`Successfully loaded translations for ${langCode}`);
-    return true;
+    try {
+      translations = await response.json();
+      console.log(`Successfully loaded translations for ${langCode}`);
+      return true;
+    } catch (parseError) {
+      console.error('Error parsing translation JSON:', parseError);
+      throw new Error('Invalid translation data format');
+    }
   } catch (error) {
     console.error('Error loading translations:', error);
     
@@ -197,23 +179,16 @@ async function switchLanguage(langCode) {
       // Update document language
       document.documentElement.lang = langCode;
       
-      // Update chatbot language if chatbot is active
-      if (window.updateChatbotLanguage) {
-        window.updateChatbotLanguage(langCode);
-      }
-      
       console.log(`Successfully switched to ${langCode}`);
       
-      // Remove loading indicator before reloading
+      // Remove loading indicator
       if (dropdown) {
         dropdown.classList.remove('loading');
         dropdown.disabled = false;
       }
       
-      // Reload page to ensure proper application of translations
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
+      // Simple page reload to ensure all translations are applied
+      window.location.reload();
     } else {
       console.error(`Failed to switch to ${langCode}`);
       
@@ -257,8 +232,11 @@ function translatePage() {
       }
       
       // If element contains HTML
-      if (element.innerHTML.includes('<')) {
-        // Preserve HTML tags
+      if (element.innerHTML.includes('<br>')) {
+        // Special handling for HTML with <br> tags
+        element.innerHTML = translations[key];
+      } else if (element.innerHTML.includes('<')) {
+        // Preserve other HTML tags
         const html = element.innerHTML;
         const text = element.textContent;
         const translatedText = translations[key];
@@ -290,16 +268,6 @@ function translatePage() {
   }
 }
 
-// Utility function to get a translation by key
-function getTranslation(key, fallback = '') {
-  if (translations[key]) {
-    return translations[key];
-  }
-  
-  console.warn(`Missing translation for key: ${key}`);
-  return fallback || key;
-}
-
 // Export the initTranslation function to the window object
 window.initTranslation = initTranslation;
 
@@ -310,6 +278,5 @@ document.addEventListener('DOMContentLoaded', initTranslation);
 window.translateSystem = {
   switchLanguage,
   getCurrentLanguage: () => currentLanguage,
-  translate: getTranslation,
-  refreshTranslations: translatePage
+  translate: (key) => translations[key] || key
 };
