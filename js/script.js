@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Video Section Enhancement with 4-sec cycles and 30-sec pause
+    // Video Section Enhancement with 4-sec video then 30-sec text display
     const video = document.getElementById('apple-style-video');
     const brandOverlay = document.querySelector('.brand-overlay');
     const brandText = document.querySelector('.brand-text');
@@ -187,6 +187,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const videoContainer = document.querySelector('.video-container');
     
     if (video) {
+        let cycleTimer = null;
+        let textTimer = null;
+        
         // Set video properties
         video.muted = true;
         video.playsInline = true;
@@ -202,86 +205,84 @@ document.addEventListener('DOMContentLoaded', function() {
         let textUpdateInterval;
         
         // Initialize text
-        brandText.textContent = generateRandomString(finalText.length);
+        brandText.textContent = "";
         brandTagline.textContent = "";
         
         // Start video cycle when loaded
         video.addEventListener('loadeddata', function() {
             videoContainer.classList.add('loaded');
-            startVideoCycle();
+            startCycle();
         });
         
         // Handle video errors
         video.addEventListener('error', function() {
             console.error('Video loading error');
-            brandOverlay.classList.add('visible');
             videoContainer.classList.add('paused');
-            startSlotMachineEffect();
+            brandOverlay.classList.add('visible');
+            showText();
         });
         
-        // Start video play cycle
-        function startVideoCycle() {
-            // Reset state
+        // Main cycle function
+        function startCycle() {
+            // Clear any existing timers
+            clearTimeout(cycleTimer);
+            clearTimeout(textTimer);
             clearInterval(textUpdateInterval);
+            
+            // Hide text, show video
             videoContainer.classList.remove('paused');
             brandOverlay.classList.remove('visible');
             
-            // Reset video and play
+            // Reset and play video
             video.currentTime = 0;
             
-            // Play for 4 seconds then pause
+            // Play video for exactly 4 seconds
             const playPromise = video.play();
-            
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    // Always pause after exactly 4 seconds
-                    setTimeout(() => {
+                    // After 4 seconds, pause video and show text
+                    cycleTimer = setTimeout(() => {
                         video.pause();
                         videoContainer.classList.add('paused');
                         brandOverlay.classList.add('visible');
-                        startSlotMachineEffect();
+                        showText();
                     }, 4000);
                 }).catch(error => {
                     console.log('Auto-play prevented:', error);
                     videoContainer.classList.add('paused');
                     brandOverlay.classList.add('visible');
-                    startSlotMachineEffect();
+                    showText();
                 });
             }
         }
         
-        // Start slot machine text effect
-        function startSlotMachineEffect() {
+        // Show text with slot machine effect
+        function showText() {
             frameCount = 0;
             
-            // Start with random text
+            // Start with empty text
             brandText.textContent = generateRandomString(finalText.length);
             brandTagline.textContent = "";
             
-            // Update text with slot machine effect
+            // Animate text with slot machine effect
             textUpdateInterval = setInterval(() => {
                 frameCount++;
                 
-                // Generate partially completed main text
+                // Generate main text
                 let text = "";
                 for (let i = 0; i < finalText.length; i++) {
-                    // If this character position should be finalized
                     if (frameCount >= i * framesPerChar) {
                         text += finalText[i];
                     } else {
                         text += chars[Math.floor(Math.random() * chars.length)];
                     }
                 }
-                
-                // Update the display
                 brandText.textContent = text;
                 
-                // Start showing tagline after main text completes
+                // Generate tagline after main text completes
                 if (frameCount >= finalText.length * framesPerChar) {
-                    // Generate tagline text with slot machine effect
                     let taglineText = "";
                     for (let i = 0; i < finalTagline.length; i++) {
-                        // Offset the tagline animation to start after main text completes
                         const taglineFrame = frameCount - (finalText.length * framesPerChar);
                         if (taglineFrame >= i * 2) {
                             taglineText += finalTagline[i];
@@ -292,19 +293,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     brandTagline.textContent = taglineText;
                 }
                 
-                // If effect is complete
+                // If text animation complete, stop updates
                 if (frameCount >= finalText.length * framesPerChar + finalTagline.length * 2 + 10) {
                     clearInterval(textUpdateInterval);
                     
-                    // Show text for 30 seconds before restarting cycle
-                    setTimeout(() => {
-                        startVideoCycle();
-                    }, 30000); // 30 seconds pause with text showing
+                    // Display text for exactly 30 seconds before replaying video
+                    textTimer = setTimeout(() => {
+                        startCycle();
+                    }, 30000);
                 }
             }, 50);
         }
         
-        // Generate random string of specified length
+        // Generate random string
         function generateRandomString(length) {
             let result = '';
             for (let i = 0; i < length; i++) {
@@ -313,10 +314,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return result;
         }
         
-        // Initial cycle start - start regardless of visibility
-        setTimeout(() => {
-            startVideoCycle();
-        }, 1000);
+        // Start the cycle after a short delay
+        setTimeout(startCycle, 1000);
     }
     
     // Animation on scroll

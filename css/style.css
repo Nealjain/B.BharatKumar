@@ -1035,7 +1035,7 @@ footer {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.8rem;
     font-weight: 400;
-    color: var(--white);
+    color: var(--gold);
     text-align: center;
     opacity: 0;
     transform: translateY(10px);
