@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Video Section Enhancement with 4-sec video then 30-sec text display
+    // Video Section Enhancement with smooth slot machine effect
     const video = document.getElementById('apple-style-video');
     const brandOverlay = document.querySelector('.brand-overlay');
     const brandText = document.querySelector('.brand-text');
@@ -196,17 +196,16 @@ document.addEventListener('DOMContentLoaded', function() {
         video.loop = false;
         video.preload = 'auto';
         
+        // Text for display with spaces between words
+        const finalTextArray = "B.Bharat Kumar".split(" ");
+        const finalTaglineArray = "Since 1950s".split(" ");
+        
         // Characters for slot machine effect
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        const finalText = "B.BharatKumar";
-        const finalTagline = "Since 1950s";
-        let frameCount = 0;
-        const framesPerChar = 3;
-        let textUpdateInterval;
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.";
         
         // Initialize text
-        brandText.textContent = "";
-        brandTagline.textContent = "";
+        brandText.innerHTML = "";
+        brandTagline.innerHTML = "";
         
         // Start video cycle when loaded
         video.addEventListener('loadeddata', function() {
@@ -227,11 +226,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear any existing timers
             clearTimeout(cycleTimer);
             clearTimeout(textTimer);
-            clearInterval(textUpdateInterval);
+            clearAllAnimationTimers();
             
             // Hide text, show video
             videoContainer.classList.remove('paused');
             brandOverlay.classList.remove('visible');
+            brandText.innerHTML = "";
+            brandTagline.innerHTML = "";
             
             // Reset and play video
             video.currentTime = 0;
@@ -256,57 +257,129 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Show text with slot machine effect
-        function showText() {
-            frameCount = 0;
-            
-            // Start with empty text
-            brandText.textContent = generateRandomString(finalText.length);
-            brandTagline.textContent = "";
-            
-            // Animate text with slot machine effect
-            textUpdateInterval = setInterval(() => {
-                frameCount++;
-                
-                // Generate main text
-                let text = "";
-                for (let i = 0; i < finalText.length; i++) {
-                    if (frameCount >= i * framesPerChar) {
-                        text += finalText[i];
-                    } else {
-                        text += chars[Math.floor(Math.random() * chars.length)];
-                    }
-                }
-                brandText.textContent = text;
-                
-                // Generate tagline after main text completes
-                if (frameCount >= finalText.length * framesPerChar) {
-                    let taglineText = "";
-                    for (let i = 0; i < finalTagline.length; i++) {
-                        const taglineFrame = frameCount - (finalText.length * framesPerChar);
-                        if (taglineFrame >= i * 2) {
-                            taglineText += finalTagline[i];
-                        } else {
-                            taglineText += chars[Math.floor(Math.random() * chars.length)];
-                        }
-                    }
-                    brandTagline.textContent = taglineText;
-                }
-                
-                // If text animation complete, stop updates
-                if (frameCount >= finalText.length * framesPerChar + finalTagline.length * 2 + 10) {
-                    clearInterval(textUpdateInterval);
-                    
-                    // Display text for exactly 30 seconds before replaying video
-                    textTimer = setTimeout(() => {
-                        startCycle();
-                    }, 30000);
-                }
-            }, 50);
+        // Animation timers storage
+        const animationTimers = [];
+        
+        // Clear all animation timers
+        function clearAllAnimationTimers() {
+            while(animationTimers.length > 0) {
+                clearTimeout(animationTimers.pop());
+            }
         }
         
-        // Generate random string
-        function generateRandomString(length) {
+        // Show text with enhanced slot machine effect
+        function showText() {
+            // Prepare containers for each word
+            let brandTextHTML = "";
+            for (let i = 0; i < finalTextArray.length; i++) {
+                brandTextHTML += `<span class="word word-${i}" style="opacity: 0;">${generateRandomText(finalTextArray[i].length)}</span> `;
+            }
+            brandText.innerHTML = brandTextHTML;
+            
+            let brandTaglineHTML = "";
+            for (let i = 0; i < finalTaglineArray.length; i++) {
+                brandTaglineHTML += `<span class="word word-${i}" style="opacity: 0;">${generateRandomText(finalTaglineArray[i].length)}</span> `;
+            }
+            brandTagline.innerHTML = brandTaglineHTML;
+            
+            // Get all word elements
+            const mainWords = document.querySelectorAll('.brand-text .word');
+            const taglineWords = document.querySelectorAll('.brand-tagline .word');
+            
+            // Total animation time for all words = 10 seconds
+            const totalAnimTimeMs = 10000;
+            const wordDelay = totalAnimTimeMs / (mainWords.length + taglineWords.length + 1);
+            
+            // Animate main text words one by one
+            mainWords.forEach((wordEl, wordIndex) => {
+                // Delay each word's animation
+                const delay = wordIndex * wordDelay;
+                
+                // Make word visible with delay
+                animationTimers.push(setTimeout(() => {
+                    wordEl.style.opacity = "1";
+                    
+                    // Animate each letter in the word
+                    const word = finalTextArray[wordIndex];
+                    const letterAnimTime = wordDelay / (word.length + 1);
+                    
+                    for (let letterIndex = 0; letterIndex < word.length; letterIndex++) {
+                        // Create slot machine effect for each letter
+                        animateLetterInWord(wordEl, letterIndex, word[letterIndex], letterAnimTime, letterIndex * letterAnimTime);
+                    }
+                }, delay));
+            });
+            
+            // Animate tagline words with delay after main text
+            const taglineStartDelay = mainWords.length * wordDelay + wordDelay/2;
+            
+            taglineWords.forEach((wordEl, wordIndex) => {
+                const delay = taglineStartDelay + wordIndex * wordDelay;
+                
+                // Make word visible with delay
+                animationTimers.push(setTimeout(() => {
+                    wordEl.style.opacity = "1";
+                    
+                    // Animate each letter in the word
+                    const word = finalTaglineArray[wordIndex];
+                    const letterAnimTime = wordDelay / (word.length + 1);
+                    
+                    for (let letterIndex = 0; letterIndex < word.length; letterIndex++) {
+                        // Create slot machine effect for each letter
+                        animateLetterInWord(wordEl, letterIndex, word[letterIndex], letterAnimTime, letterIndex * letterAnimTime);
+                    }
+                }, delay));
+            });
+            
+            // Schedule next cycle after 30 seconds
+            textTimer = setTimeout(() => {
+                startCycle();
+            }, 30000);
+        }
+        
+        // Animate a single letter with slot machine effect
+        function animateLetterInWord(wordEl, letterIndex, finalLetter, duration, delay) {
+            // Generate random characters for the effect (5-10 characters)
+            const numRandomChars = 5 + Math.floor(Math.random() * 6); // 5-10 characters
+            const initialText = wordEl.textContent;
+            
+            // Track the current frame
+            let frame = 0;
+            const totalFrames = numRandomChars;
+            const frameInterval = duration / totalFrames;
+            
+            // Start animation after specified delay
+            const letterTimer = setTimeout(() => {
+                // Create interval for changing characters
+                const interval = setInterval(() => {
+                    // Get current text and split into array
+                    let textArray = wordEl.textContent.split('');
+                    
+                    // If we've reached the last frame, show the final letter
+                    if (frame >= totalFrames - 1) {
+                        textArray[letterIndex] = finalLetter;
+                        wordEl.textContent = textArray.join('');
+                        clearInterval(interval);
+                        return;
+                    }
+                    
+                    // Otherwise show random character
+                    textArray[letterIndex] = chars.charAt(Math.floor(Math.random() * chars.length));
+                    wordEl.textContent = textArray.join('');
+                    
+                    frame++;
+                }, frameInterval);
+                
+                // Store timer reference
+                animationTimers.push(interval);
+            }, delay);
+            
+            // Store timer reference
+            animationTimers.push(letterTimer);
+        }
+        
+        // Generate random text of specified length
+        function generateRandomText(length) {
             let result = '';
             for (let i = 0; i < length; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
