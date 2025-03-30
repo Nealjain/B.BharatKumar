@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Video Section Enhancement with 4-sec cycles and text slot machine
+    // Video Section Enhancement with 4-sec cycles and 30-sec pause
     const video = document.getElementById('apple-style-video');
     const brandOverlay = document.querySelector('.brand-overlay');
     const brandText = document.querySelector('.brand-text');
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set video properties
         video.muted = true;
         video.playsInline = true;
-        video.loop = false; // Don't loop automatically
+        video.loop = false;
         video.preload = 'auto';
         
         // Characters for slot machine effect
@@ -216,12 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Video loading error');
             brandOverlay.classList.add('visible');
             videoContainer.classList.add('paused');
-        });
-        
-        // Video ended event
-        video.addEventListener('ended', function() {
-            videoContainer.classList.add('paused');
-            brandOverlay.classList.add('visible');
             startSlotMachineEffect();
         });
         
@@ -235,21 +229,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset video and play
             video.currentTime = 0;
             
-            // Play for 4 seconds then pause and show overlay
+            // Play for 4 seconds then pause
             const playPromise = video.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    // If video is longer than 4 seconds, set a timeout to pause it
-                    if (video.duration > 4) {
-                        setTimeout(() => {
-                            video.pause();
-                            videoContainer.classList.add('paused');
-                            brandOverlay.classList.add('visible');
-                            startSlotMachineEffect();
-                        }, 4000);
-                    }
-                    // If video is shorter than 4 seconds, the 'ended' event will trigger
+                    // Always pause after exactly 4 seconds
+                    setTimeout(() => {
+                        video.pause();
+                        videoContainer.classList.add('paused');
+                        brandOverlay.classList.add('visible');
+                        startSlotMachineEffect();
+                    }, 4000);
                 }).catch(error => {
                     console.log('Auto-play prevented:', error);
                     videoContainer.classList.add('paused');
@@ -285,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update the display
                 brandText.textContent = text;
                 
-                // Start showing tagline after main text is complete
+                // Start showing tagline after main text completes
                 if (frameCount >= finalText.length * framesPerChar) {
                     // Generate tagline text with slot machine effect
                     let taglineText = "";
@@ -302,13 +293,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // If effect is complete
-                if (frameCount >= finalText.length * framesPerChar + finalTagline.length * 2 + 20) {
+                if (frameCount >= finalText.length * framesPerChar + finalTagline.length * 2 + 10) {
                     clearInterval(textUpdateInterval);
                     
-                    // After 3 seconds, start the cycle again
+                    // Show text for 30 seconds before restarting cycle
                     setTimeout(() => {
                         startVideoCycle();
-                    }, 3000);
+                    }, 30000); // 30 seconds pause with text showing
                 }
             }, 50);
         }
@@ -322,11 +313,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return result;
         }
         
-        // Initial cycle start
+        // Initial cycle start - start regardless of visibility
         setTimeout(() => {
-            if (videoContainer.classList.contains('loaded')) {
-                startVideoCycle();
-            }
+            startVideoCycle();
         }, 1000);
     }
     

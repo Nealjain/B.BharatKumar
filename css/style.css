@@ -1022,7 +1022,7 @@ footer {
     color: var(--gold);
     text-align: center;
     line-height: 1.2;
-    text-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
     transform: scale(0.9);
     transition: transform 0.5s ease;
     letter-spacing: 2.5px;
@@ -1046,25 +1046,11 @@ footer {
 
 .brand-overlay.visible .brand-text {
     transform: scale(1);
-    animation: textGlow 1.5s ease-in-out infinite alternate;
 }
 
 .brand-overlay.visible .brand-tagline {
     opacity: 1;
     transform: translateY(0);
-}
-
-@keyframes textGlow {
-    from {
-        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5),
-                    0 0 10px rgba(255, 215, 0, 0.5),
-                    0 0 15px rgba(255, 215, 0, 0.5);
-    }
-    to {
-        text-shadow: 0 0 10px rgba(255, 215, 0, 0.8),
-                    0 0 20px rgba(255, 215, 0, 0.8),
-                    0 0 30px rgba(255, 215, 0, 0.8);
-    }
 }
 
 @media (max-width: 768px) {
