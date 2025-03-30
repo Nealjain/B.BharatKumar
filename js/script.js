@@ -258,17 +258,17 @@ if (video) {
         // Reset and play video
         video.currentTime = 0;
         
-        // Play video for exactly 4 seconds
+        // Play video for exactly 3 seconds (changed from 4 seconds)
         const playPromise = video.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                // After 4 seconds, pause video and show text
+                // After 3 seconds, pause video and show text
                 cycleTimer = setTimeout(() => {
                     video.pause();
                     videoContainer.classList.add('paused');
                     brandOverlay.classList.add('visible');
                     showText();
-                }, 4000);
+                }, 3000); // Changed from 4000 to 3000
             }).catch(error => {
                 console.log('Auto-play prevented:', error);
                 videoContainer.classList.add('paused');
@@ -307,8 +307,8 @@ if (video) {
         const mainWords = document.querySelectorAll('.brand-text .word');
         const taglineWords = document.querySelectorAll('.brand-tagline .word');
         
-        // Total animation time for all words = 10 seconds
-        const totalAnimTimeMs = 10000;
+        // Total animation time for all words = 3 seconds (reduced from 10 seconds)
+        const totalAnimTimeMs = 3000;
         const wordDelay = totalAnimTimeMs / (mainWords.length + taglineWords.length + 1);
         
         // Animate main text words one by one
@@ -352,10 +352,10 @@ if (video) {
             }, delay));
         });
         
-        // Schedule next cycle after 30 seconds
+        // Schedule next cycle after 15 seconds (reduced from 30 seconds)
         textTimer = setTimeout(() => {
             startCycle();
-        }, 30000);
+        }, 15000);
     }
     
     // Animate a single letter with slot machine effect

@@ -39,9 +39,6 @@ async function initTranslation() {
       // Apply translations
       translatePage();
       
-      // Showcase notice in current language
-      updateShowcaseNotice();
-      
       // Set document language
       document.documentElement.lang = currentLanguage;
       
@@ -178,9 +175,6 @@ async function switchLanguage(langCode) {
       // Apply translations
       translatePage();
       
-      // Update showcase notice
-      updateShowcaseNotice();
-      
       // Update document language
       document.documentElement.lang = langCode;
       
@@ -266,16 +260,10 @@ function translatePage() {
   }
 }
 
-// Update showcase notice with current language
+// The showcase banner has been removed, so we don't need this function anymore
+// Keeping a simplified version that does nothing for backward compatibility
 function updateShowcaseNotice() {
-  try {
-    const showcaseNotice = document.querySelector('.showcase-notice');
-    if (showcaseNotice && translations['showcase_notice']) {
-      showcaseNotice.textContent = translations['showcase_notice'];
-    }
-  } catch (error) {
-    console.error('Error updating showcase notice:', error);
-  }
+  // Showcase banner has been removed, nothing to update
 }
 
 // Utility function to get a translation by key
